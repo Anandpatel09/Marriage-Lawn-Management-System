@@ -1,8 +1,10 @@
+import Register from "./pages/auth/Register"
+
 function App() {
 
   return (
     <>
-      <h1 className="bg">welcom msms</h1>
+      <Register />
 
     </>
   )
