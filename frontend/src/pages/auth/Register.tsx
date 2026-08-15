@@ -9,12 +9,8 @@ const Register = () => {
         <div className="w-full md:w-1/2 p-8 md:p-10">
 
           <h1 className="text-3xl font-bold text-slate-800 mb-2">
-            DURGA MARRIAGE LAWN
-          </h1>
-
-          <p className="text-slate-500 mb-8">
             Create your account
-          </p>
+          </h1>
 
           <form className="space-y-4">
 
