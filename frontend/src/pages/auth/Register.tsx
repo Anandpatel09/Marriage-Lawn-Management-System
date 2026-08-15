@@ -13,43 +13,45 @@ const Register = () => {
           </h1>
 
           <form className="space-y-4">
+              {/* First Name */}
+            <div className="flex flex-column gap-2 ">
+              <div>
+                <label
+                  htmlFor="firstName"
+                  className="block text-sm font-medium text-slate-700 mb-1"
+                >
+                  First Name
+                </label>
 
-            {/* First Name */}
-            <div>
-              <label
-                htmlFor="firstName"
-                className="block text-sm font-medium text-slate-700 mb-1"
-              >
-                First Name
-              </label>
-
-              <input
-                id="firstName"
-                type="text"
-                placeholder="Enter first name"
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg
+                <input
+                  id="firstName"
+                  type="text"
+                  placeholder="Enter first name"
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg
                 outline-none focus:ring-2 focus:ring-blue-500
                 focus:border-blue-500 transition"
-              />
-            </div>
+                />
+              </div>
 
-            {/* Last Name */}
-            <div>
-              <label
-                htmlFor="lastName"
-                className="block text-sm font-medium text-slate-700 mb-1"
-              >
-                Last Name
-              </label>
+              {/* Last Name */}
+              <div>
+                <label
+                  htmlFor="lastName"
+                  className="block text-sm font-medium text-slate-700 mb-1"
+                >
+                  Last Name
+                </label>
 
-              <input
-                id="lastName"
-                type="text"
-                placeholder="Enter last name"
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg
+                <input
+                  id="lastName"
+                  type="text"
+                  placeholder="Enter last name"
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg
                 outline-none focus:ring-2 focus:ring-blue-500
                 focus:border-blue-500 transition"
-              />
+                />
+              </div>
+
             </div>
 
             {/* Email */}
@@ -110,41 +112,44 @@ const Register = () => {
             </div>
 
             {/* Password */}
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-slate-700 mb-1"
-              >
-                Password
-              </label>
+            <div className=" flex flex-column gap-2 ">
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-slate-700 mb-1"
+                >
+                  Password
+                </label>
 
-              <input
-                id="password"
-                type="password"
-                placeholder="Enter password"
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg
+                <input
+                  id="password"
+                  type="password"
+                  placeholder="Enter password"
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg
                 outline-none focus:ring-2 focus:ring-blue-500
                 focus:border-blue-500 transition"
-              />
-            </div>
+                />
+              </div>
 
-            {/* Confirm Password */}
-            <div>
-              <label
-                htmlFor="confirmPassword"
-                className="block text-sm font-medium text-slate-700 mb-1"
-              >
-                Confirm Password
-              </label>
+              {/* Confirm Password */}
+              <div>
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-sm font-medium text-slate-700 mb-1"
+                >
+                  Confirm Password
+                </label>
 
-              <input
-                id="confirmPassword"
-                type="password"
-                placeholder="Confirm password"
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg
+                <input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="Confirm password"
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg
                 outline-none focus:ring-2 focus:ring-blue-500
                 focus:border-blue-500 transition"
-              />
+                />
+              </div>
+
             </div>
 
             {/* Button */}
