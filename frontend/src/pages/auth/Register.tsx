@@ -1,24 +1,42 @@
 const Register = () => {
   return (
-    <div className="min-h-screen bg-slate-100 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-[#17120f] flex items-center justify-center px-4 py-4">
 
       {/* Main Container */}
-      <div className="w-full max-w-5xl bg-white rounded-2xl shadow-xl overflow-hidden flex">
+      <div className="w-full max-w-2xl h-112.5 bg-[#2b211c] rounded-2xl shadow-xl overflow-hidden flex">
 
-        {/* Form Section */}
-        <div className="w-full md:w-1/2 p-8 md:p-10">
+        {/* ================= FORM SECTION ================= */}
+        <div className="w-full md:w-1/2 p-4">
 
-          <h1 className="text-3xl font-bold text-slate-800 mb-2">
+          {/* Logo */}
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-9 h-9 bg-[#a94b3f] rounded-lg flex items-center justify-center text-white text-xl">
+              V
+            </div>
+
+            <span className="text-white text-lg font-medium">
+              Vivaah Lawns
+            </span>
+          </div>
+
+          {/* Heading */}
+          <h1 className="text-2xl font-semibold text-white mb-1">
             Create your account
           </h1>
 
-          <form className="space-y-4">
-              {/* First Name */}
-            <div className="flex flex-column gap-2 ">
+          <p className="text-[#a99e98] text-xs mb-3">
+            Register to manage your lawn bookings.
+          </p>
+
+          <form className="space-y-2">
+
+            {/* First Name + Last Name */}
+            <div className="grid grid-cols-2 gap-3">
+
               <div>
                 <label
                   htmlFor="firstName"
-                  className="block text-sm font-medium text-slate-700 mb-1"
+                  className="block text-xs font-medium text-white mb-1"
                 >
                   First Name
                 </label>
@@ -26,18 +44,15 @@ const Register = () => {
                 <input
                   id="firstName"
                   type="text"
-                  placeholder="Enter first name"
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg
-                outline-none focus:ring-2 focus:ring-blue-500
-                focus:border-blue-500 transition"
+                  placeholder="First name"
+                  className="w-full px-3 py-1.5 bg-transparent border border-[#4b4039] rounded-lg text-sm text-white placeholder-[#80756f] outline-none focus:border-[#d8a849] transition"
                 />
               </div>
 
-              {/* Last Name */}
               <div>
                 <label
                   htmlFor="lastName"
-                  className="block text-sm font-medium text-slate-700 mb-1"
+                  className="block text-xs font-medium text-white mb-1"
                 >
                   Last Name
                 </label>
@@ -45,58 +60,55 @@ const Register = () => {
                 <input
                   id="lastName"
                   type="text"
-                  placeholder="Enter last name"
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg
-                outline-none focus:ring-2 focus:ring-blue-500
-                focus:border-blue-500 transition"
+                  placeholder="Last name"
+                  className="w-full px-3 py-1.5 bg-transparent border border-[#4b4039] rounded-lg text-sm text-white placeholder-[#80756f] outline-none focus:border-[#d8a849] transition"
                 />
               </div>
 
             </div>
 
-            {/* Email */}
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-slate-700 mb-1"
-              >
-                Email
-              </label>
+            {/* Email + Mobile */}
+            <div className="grid grid-cols-2 gap-3">
 
-              <input
-                id="email"
-                type="email"
-                placeholder="Enter email"
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg
-                outline-none focus:ring-2 focus:ring-blue-500
-                focus:border-blue-500 transition"
-              />
-            </div>
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block text-xs font-medium text-white mb-1"
+                >
+                  Email
+                </label>
 
-            {/* Mobile */}
-            <div>
-              <label
-                htmlFor="mobile"
-                className="block text-sm font-medium text-slate-700 mb-1"
-              >
-                Mobile Number
-              </label>
+                <input
+                  id="email"
+                  type="email"
+                  placeholder="Enter email"
+                  className="w-full px-3 py-1.5 bg-transparent border border-[#4b4039] rounded-lg text-sm text-white placeholder-[#80756f] outline-none focus:border-[#d8a849] transition"
+                />
+              </div>
 
-              <input
-                id="mobile"
-                type="tel"
-                placeholder="Enter mobile number"
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg
-                outline-none focus:ring-2 focus:ring-blue-500
-                focus:border-blue-500 transition"
-              />
+              <div>
+                <label
+                  htmlFor="mobile"
+                  className="block text-xs font-medium text-white mb-1"
+                >
+                  Mobile
+                </label>
+
+                <input
+                  id="mobile"
+                  type="tel"
+                  placeholder="Mobile number"
+                  className="w-full px-3 py-1.5 bg-transparent border border-[#4b4039] rounded-lg text-sm text-white placeholder-[#80756f] outline-none focus:border-[#d8a849] transition"
+                />
+              </div>
+
             </div>
 
             {/* City */}
             <div>
               <label
                 htmlFor="city"
-                className="block text-sm font-medium text-slate-700 mb-1"
+                className="block text-xs font-medium text-white mb-1"
               >
                 City
               </label>
@@ -105,18 +117,17 @@ const Register = () => {
                 id="city"
                 type="text"
                 placeholder="Enter city"
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg
-                outline-none focus:ring-2 focus:ring-blue-500
-                focus:border-blue-500 transition"
+                className="w-full px-3 py-1.5 bg-transparent border border-[#4b4039] rounded-lg text-sm text-white placeholder-[#80756f] outline-none focus:border-[#d8a849] transition"
               />
             </div>
 
-            {/* Password */}
-            <div className=" flex flex-column gap-2 ">
+            {/* Password + Confirm Password */}
+            <div className="grid grid-cols-2 gap-3">
+
               <div>
                 <label
                   htmlFor="password"
-                  className="block text-sm font-medium text-slate-700 mb-1"
+                  className="block text-xs font-medium text-white mb-1"
                 >
                   Password
                 </label>
@@ -124,18 +135,15 @@ const Register = () => {
                 <input
                   id="password"
                   type="password"
-                  placeholder="Enter password"
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg
-                outline-none focus:ring-2 focus:ring-blue-500
-                focus:border-blue-500 transition"
+                  placeholder="Password"
+                  className="w-full px-3 py-1.5 bg-transparent border border-[#4b4039] rounded-lg text-sm text-white placeholder-[#80756f] outline-none focus:border-[#d8a849] transition"
                 />
               </div>
 
-              {/* Confirm Password */}
               <div>
                 <label
                   htmlFor="confirmPassword"
-                  className="block text-sm font-medium text-slate-700 mb-1"
+                  className="block text-xs font-medium text-white mb-1"
                 >
                   Confirm Password
                 </label>
@@ -144,57 +152,60 @@ const Register = () => {
                   id="confirmPassword"
                   type="password"
                   placeholder="Confirm password"
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg
-                outline-none focus:ring-2 focus:ring-blue-500
-                focus:border-blue-500 transition"
+                  className="w-full px-3 py-1.5 bg-transparent border border-[#4b4039] rounded-lg text-sm text-white placeholder-[#80756f] outline-none focus:border-[#d8a849] transition"
                 />
               </div>
 
             </div>
 
-            {/* Button */}
+            {/* Create Account Button */}
             <button
               type="submit"
-              className="w-full mt-4 bg-blue-600 hover:bg-blue-700
-              text-white font-semibold py-3 rounded-lg
-              transition duration-200"
+              className="w-full mt-1 bg-[#d8a849] hover:bg-[#c99a3d] text-black text-sm font-semibold py-2 rounded-lg transition duration-200"
             >
               Create Account
             </button>
 
           </form>
 
-          <p className="text-center text-sm text-slate-500 mt-5">
+          {/* Login */}
+          <p className="text-center text-xs text-[#a99e98] mt-3">
             Already have an account?{" "}
-            <span className="text-blue-600 font-medium cursor-pointer hover:underline">
+            <span className="text-[#c85b4d] font-medium cursor-pointer hover:underline">
               Login
             </span>
           </p>
 
         </div>
 
-        {/* Image Section */}
-        <div className="hidden md:flex md:w-1/2 bg-blue-600 items-center justify-center">
+        {/* ================= RIGHT SECTION ================= */}
+        <div className="hidden md:flex md:w-1/2 bg-[#a94b3f] items-center justify-center p-6">
 
           <div className="text-center text-white">
-            <div className="w-52 h-52 bg-white/20 rounded-full flex items-center justify-center mx-auto">
-              <span className="text-6xl">🏡</span>
+
+            {/* Icon */}
+            <div className="w-32 h-32 bg-white/10 rounded-full flex items-center justify-center mx-auto">
+              <span className="text-5xl">🏡</span>
             </div>
 
-            <h2 className="text-3xl font-bold mt-6">
-              Welcome to Durga Marriage Lawn
+            {/* Heading */}
+            <h2 className="text-2xl font-semibold mt-3">
+              Welcome to Vivaah Lawns
             </h2>
 
-            <p className="text-blue-100 mt-3">
-              Create your account to manage your lawn bookings.
+            {/* Description */}
+            <p className="text-white/70 mt-2 text-sm max-w-sm">
+              Create your account and start managing your marriage lawn
+              bookings with ease.
             </p>
+
           </div>
 
         </div>
 
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Register
+export default Register;
