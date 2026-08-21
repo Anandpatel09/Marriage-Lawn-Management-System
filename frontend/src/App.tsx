@@ -1,12 +1,16 @@
+import Navbar from "./components/comman/Navbar"
 import Login from "./pages/auth/Login"
 import Register from "./pages/auth/Register"
+import Home from "./pages/public/Home"
 
 function App() {
 
   return (
     <>
-      <Register />
-      <Login />
+    <Home/>
+      {/* <Register /> */}
+      {/* <Login /> */}
+      
 
     </>
   )

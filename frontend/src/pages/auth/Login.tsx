@@ -1,23 +1,23 @@
-import React from 'react'
+
 
 const Login = () => {
     return (
         <div className="min-h-screen bg-[#17120f] flex items-center justify-center px-4 py-4">
             {/* Main Container */}
             <div className="w-full max-w-xl h-112.5 bg-[#2b211c] rounded-2xl shadow-xl overflow-hidden flex items-center justify-center">
-                <div className="w-full md:w-1/2 p-4">
+                <div className="w-full max-w-md p-4">
 
                     {/* Logo */}
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="w-9 h-9 bg-[#a94b3f] rounded-lg flex items-center justify-center text-white text-xl">
-                            V
+                        <div className="w-14 h-9 bg-[#a94b3f] rounded-lg flex items-center justify-center text-white text-xl">
+                            DML
                         </div>
 
                         <span className="text-white text-lg font-medium">
-                            Vivaah Lawns
+                            Durga Marriage Lawn
                         </span>
                     </div>
-
+        
                     {/* Heading */}
                     <h1 className="text-2xl font-semibold text-white mb-1">
                         Welcome back          </h1>
@@ -101,3 +101,4 @@ const Login = () => {
 }
 
 export default Login
+
