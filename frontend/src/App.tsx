@@ -1,13 +1,13 @@
-import Navbar from "./components/comman/Navbar"
-import Login from "./pages/auth/Login"
-import Register from "./pages/auth/Register"
-import Home from "./pages/public/Home"
+
+import AppRoutes from "./routes/AppRoutes"
 
 function App() {
 
   return (
     <>
-    <Home/>
+         <AppRoutes />;
+
+    {/* <Home/> */}
       {/* <Register /> */}
       {/* <Login /> */}
       
