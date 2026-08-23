@@ -1,4 +1,8 @@
+import { Link, useNavigate } from "react-router-dom";
+
+
 const Register = () => {
+  const usenavigat = useNavigate()
   return (
     <div className="min-h-screen bg-[#17120f] flex items-center justify-center px-4 py-4">
 
@@ -172,7 +176,14 @@ const Register = () => {
           <p className="text-center text-xs text-[#a99e98] mt-3">
             Already have an account?{" "}
             <span className="text-[#c85b4d] font-medium cursor-pointer hover:underline">
-              Login
+              <Link
+                to="/login"
+              >
+                Login
+              </Link>
+
+
+
             </span>
           </p>
 
