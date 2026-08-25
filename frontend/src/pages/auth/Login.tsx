@@ -1,11 +1,18 @@
+import { Eye } from "lucide-react"
+import { useState } from "react"
+import { useNavigate } from "react-router-dom";
+
 
 
 const Login = () => {
+
+    const [role, setRole] = useState("customer");
+    const navigate = useNavigate()
     return (
         <div className="min-h-screen bg-[#17120f] flex items-center justify-center px-4 py-4">
             {/* Main Container */}
-            <div className="w-full max-w-xl h-112.5 bg-[#2b211c] rounded-2xl shadow-xl overflow-hidden flex items-center justify-center">
-                <div className="w-full max-w-md p-4">
+            <div className="w-87 h-[23] bg-[#2b211c] rounded-lg shadow-xl overflow-hidden flex items-center justify-center">
+                <div className="w-full max-w-md p-7">
 
                     {/* Logo */}
                     <div className="flex items-center gap-3 mb-2">
@@ -17,13 +24,38 @@ const Login = () => {
                             Durga Marriage Lawn
                         </span>
                     </div>
-        
+
                     {/* Heading */}
                     <h1 className="text-2xl font-semibold text-white mb-1">
                         Welcome back          </h1>
 
                     <p className="text-[#a99e98] text-xs mb-3">
-                        Sign in to continue to your dashboard.          </p>
+                        Sign in to continue.          </p>
+
+                    {/* toggel switch */}
+                    <div className="w-full flex p-1 bg-[#332a25] rounded-lg">
+
+                        <button
+                            onClick={() => setRole("admin")}
+                            className={`w-1/2 p-r-2 rounded-md text-sm font-medium   ${role === "admin"
+                                ? "bg-[#17120f] text-white"
+                                : "text-[#b8aea8]"
+                                }`}
+                        >
+                            Admin
+                        </button>
+
+                        <button
+                            onClick={() => setRole("customer")}
+                            className={`w-1/2 py-1 rounded-md text-sm font-medium  ${role === "customer"
+                                ? "bg-[#17120f] text-white"
+                                : "text-[#b8aea8]"
+                                }`}
+                        >
+                            Customer
+                        </button>
+
+                    </div>
 
                     <form className="space-y-2">
 
@@ -56,14 +88,23 @@ const Login = () => {
                                 className="block text-xs font-medium text-white mb-1"
                             >
                                 Password
+
+
                             </label>
 
-                            <input
-                                id="password"
-                                type="password"
-                                placeholder="Password"
-                                className="w-full px-3 py-1.5 bg-transparent border border-[#4b4039] rounded-lg text-sm text-white placeholder-[#80756f] outline-none focus:border-[#d8a849] transition"
-                            />
+                            <div className="relative w-full">
+                                <input
+                                    id="password"
+                                    type="password"
+                                    placeholder="Password"
+                                    className="w-full px-3 py-1.5 pr-10 bg-transparent border border-[#4b4039] rounded-lg text-sm text-white placeholder-[#80756f] outline-none focus:border-[#d8a849] transition"
+                                />
+
+                                <Eye
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#80756f] cursor-pointer"
+                                    size={18}
+                                />
+                            </div>
                         </div>
 
 
@@ -89,7 +130,9 @@ const Login = () => {
                     {/* Login */}
                     <p className="text-center text-xs text-[#a99e98] mt-3">
                         New here?{" "}
-                        <span className="text-[#c85b4d] font-medium cursor-pointer hover:underline">
+                        <span
+                            className="text-[#c85b4d] font-medium cursor-pointer hover:underline"
+                            onClick={() => navigate("/register")}>
                             Create an account?
                         </span>
                     </p>

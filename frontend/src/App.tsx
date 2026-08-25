@@ -7,10 +7,6 @@ function App() {
     <>
          <AppRoutes />;
 
-    {/* <Home/> */}
-      {/* <Register /> */}
-      {/* <Login /> */}
-      
 
     </>
   )

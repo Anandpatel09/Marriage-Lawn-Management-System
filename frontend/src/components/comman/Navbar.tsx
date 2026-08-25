@@ -63,7 +63,7 @@ const Navbar = () => {
                         to="/bookings"
                         className="px-4 py-2 rounded-lg text-[#aaa19b] hover:text-white text-sm transition"
                     >
-                        My Bookings
+                        Bookings
                     </Link>
 
                     <Link
@@ -96,7 +96,7 @@ const Navbar = () => {
 
                     {/* Sign In */}
                     <button
-                    onClick={()=> navigat("/singnin")}
+                    onClick={()=> navigat("/register")}
                     
                         className="ml-2 px-5 py-2 bg-[#d8a849] hover:bg-[#c99a3d] text-black text-sm font-medium rounded-lg transition"
                     >
