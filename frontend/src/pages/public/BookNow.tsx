@@ -27,7 +27,7 @@ const BookNow = () => {
   const gst = subtotal * 0.18;
   const total = subtotal + gst;
 
-  const formatPrice = (price) => {
+  const formatPrice = (price:any) => {
     return `₹${price.toLocaleString("en-IN")}`;
   };
 
@@ -116,11 +116,11 @@ const BookNow = () => {
             {/* ================= DATE & VENUE ================= */}
             <section className="border border-[#4a4039] bg-[#241d18] rounded-lg p-3">
 
-              <h2 className="text-xs font-semibold mb-4">
+              <h2 className="text-[15] font-semibold mb-4">
                 Choose date & venue
               </h2>
 
-              <div className="grid grid-cols-1 md:grid-cols-[184px_1fr] gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-4">
 
 
                 {/* Calendar */}
@@ -193,13 +193,13 @@ const BookNow = () => {
 
 
                 {/* Venue / Package */}
-                <div className="space-y-4 w-75 flex flex-col ml-35">
+                <div className="space-y-2 w-75 flex flex-col ml-35">
 
                   {/* Venue */}
                   <div>
                     <label
                       htmlFor="venue"
-                      className="block text-[9px] font-medium mb-1"
+                      className="block text-[13px] font-medium mb-1"
                     >
                       Lawn
                     </label>
@@ -208,7 +208,7 @@ const BookNow = () => {
                       id="venue"
                       value={venue}
                       onChange={(e) => setVenue(e.target.value)}
-                      className="w-full h-8 px-2 bg-transparent border border-[#4b4039] rounded-md text-[9px] text-white outline-none focus:border-[#d8a849]"
+                      className="w-full h-8 px-2 bg-transparent border border-[#4b4039] rounded-md text-[11px] text-white outline-none focus:border-[#d8a849]"
                     >
                       <option
                         className="bg-[#241d18]"
@@ -226,7 +226,7 @@ const BookNow = () => {
                   <div>
                     <label
                       htmlFor="package"
-                      className="block text-[9px] font-medium mb-1"
+                      className="block text-[13px] font-medium mb-1"
                     >
                       Package
                     </label>
@@ -235,7 +235,7 @@ const BookNow = () => {
                       id="package"
                       value={packageName}
                       onChange={(e) => setPackageName(e.target.value)}
-                      className="w-full h-8 px-2 bg-transparent border border-[#4b4039] rounded-md text-[9px] text-white outline-none focus:border-[#d8a849]"
+                      className="w-full h-8 px-2 bg-transparent border border-[#4b4039] rounded-md text-[11px] text-white outline-none focus:border-[#d8a849]"
                     >
                       <option
                         className="bg-[#241d18]"
@@ -250,7 +250,7 @@ const BookNow = () => {
                   <div>
                     <label
                       htmlFor="occasions"
-                      className="block text-[9px] font-medium mb-1"
+                      className="block text-[13px] font-medium mb-1"
                     >
                       Occasions
                     </label>
@@ -259,7 +259,7 @@ const BookNow = () => {
                       id="occasions"
                       value={ocas}
                       onChange={(e) => setOcas(e.target.value)}
-                      className="w-full h-8 px-2 bg-transparent border border-[#4b4039] rounded-md text-[9px] text-white outline-none focus:border-[#d8a849]"
+                      className="w-full h-8 px-2 bg-transparent border border-[#4b4039] rounded-md text-[11px] text-white outline-none focus:border-[#d8a849]"
                     >
                       <option
                         className="bg-[#241d18]"
@@ -285,7 +285,7 @@ const BookNow = () => {
                   <div>
                     <label
                       htmlFor="guests"
-                      className="block text-[9px] font-medium mb-1"
+                      className="block text-[13px] font-medium mb-1"
                     >
                       Guests
                     </label>
@@ -298,7 +298,7 @@ const BookNow = () => {
                       onChange={(e) =>
                         setGuests(Number(e.target.value))
                       }
-                      className="w-full h-8 px-2 bg-transparent border border-[#4b4039] rounded-md text-[9px] text-white outline-none focus:border-[#d8a849]"
+                      className="w-full h-8 px-2 bg-transparent border border-[#4b4039] rounded-md text-[11px] text-white outline-none focus:border-[#d8a849]"
                     />
                   </div>
 
@@ -327,12 +327,12 @@ const BookNow = () => {
             {/* ================= SUMMARY ================= */}
             <aside className="border border-[#4a4039] bg-[#241d18] rounded-lg p-3">
 
-              <h2 className="text-xs font-semibold mb-5">
+              <h2 className="text-[15] font-semibold mb-5">
                 Summary
               </h2>
 
 
-              <div className="space-y-3 text-[9px]">
+              <div className="space-y-3 text-[11px]">
 
                 <div className="flex justify-between">
                   <span className="text-[#8f827a]">
@@ -404,7 +404,7 @@ const BookNow = () => {
 
               <button
                 type="button"
-                className="w-full mt-4 py-2 bg-[#d8a849] hover:bg-[#c99a3d] text-black text-[9px] font-medium rounded-md transition"
+                className="w-full mt-4 py-2 bg-[#d8a849] hover:bg-[#c99a3d] text-black text-[12px] font-medium rounded-md transition"
               >
                 Request booking
               </button>
@@ -412,7 +412,7 @@ const BookNow = () => {
 
               <button
                 type="button"
-                className="w-full mt-2 py-1.5 border border-[#4b4039] hover:bg-[#302721] text-white text-[9px] rounded-md transition"
+                className="w-full mt-2 py-1.5 border border-[#4b4039] hover:bg-[#302721] text-white text-[12px] rounded-md transition"
               >
                 Talk to us first
               </button>
@@ -425,7 +425,7 @@ const BookNow = () => {
           {/* ================= YOUR DETAILS ================= */}
           <section className="mt-4 border border-[#4a4039] bg-[#241d18] rounded-lg p-3">
 
-            <h2 className="text-xs font-semibold mb-4">
+            <h2 className="text-[15] font-semibold mb-4">
               Your details
             </h2>
 
@@ -436,7 +436,7 @@ const BookNow = () => {
               <div>
                 <label
                   htmlFor="name"
-                  className="block text-[9px] font-medium mb-1"
+                  className="block text-[13px] font-medium mb-1"
                 >
                   Full name
                 </label>
@@ -447,7 +447,7 @@ const BookNow = () => {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Your full name"
-                  className="w-full h-8 px-2 bg-transparent border border-[#4b4039] rounded-md text-[9px] text-white placeholder-[#81756e] outline-none focus:border-[#d8a849]"
+                  className="w-full h-8 px-2 bg-transparent border border-[#4b4039] rounded-md text-[12px] text-white placeholder-[#81756e] outline-none focus:border-[#d8a849]"
                 />
               </div>
 
@@ -455,7 +455,7 @@ const BookNow = () => {
               <div>
                 <label
                   htmlFor="mobile"
-                  className="block text-[9px] font-medium mb-1"
+                  className="block text-[13px] font-medium mb-1"
                 >
                   Mobile
                 </label>
@@ -466,7 +466,7 @@ const BookNow = () => {
                   value={mobile}
                   onChange={(e) => setMobile(e.target.value)}
                   placeholder="+91 98290 00000"
-                  className="w-full h-8 px-2 bg-transparent border border-[#4b4039] rounded-md text-[9px] text-white placeholder-[#81756e] outline-none focus:border-[#d8a849]"
+                  className="w-full h-8 px-2 bg-transparent border border-[#4b4039] rounded-md text-[12px] text-white placeholder-[#81756e] outline-none focus:border-[#d8a849]"
                 />
               </div>
 
@@ -478,7 +478,7 @@ const BookNow = () => {
 
               <label
                 htmlFor="email"
-                className="block text-[9px] font-medium mb-1"
+                className="block text-[13px] font-medium mb-1"
               >
                 Email
               </label>
@@ -489,7 +489,7 @@ const BookNow = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full h-8 px-2 bg-transparent border border-[#4b4039] rounded-md text-[9px] text-white placeholder-[#81756e] outline-none focus:border-[#d8a849]"
+                className="w-full h-8 px-2 bg-transparent border border-[#4b4039] rounded-md text-[12px] text-white placeholder-[#81756e] outline-none focus:border-[#d8a849]"
               />
 
             </div>
@@ -500,7 +500,7 @@ const BookNow = () => {
 
               <label
                 htmlFor="requests"
-                className="block text-[9px] font-medium mb-1"
+                className="block text-[13px] font-medium mb-1"
               >
                 Special requests
               </label>
@@ -511,7 +511,7 @@ const BookNow = () => {
                 onChange={(e) => setRequests(e.target.value)}
                 rows={3}
                 placeholder="Anything we should know?"
-                className="w-full px-2 py-2 bg-transparent border border-[#4b4039] rounded-md text-[9px] text-white placeholder-[#81756e] outline-none focus:border-[#d8a849] resize-none"
+                className="w-full px-2 py-2 bg-transparent border border-[#4b4039] rounded-md text-[12px] text-white placeholder-[#81756e] outline-none focus:border-[#d8a849] resize-none"
               />
 
             </div>

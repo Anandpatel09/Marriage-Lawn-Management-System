@@ -6,6 +6,7 @@ import Login from "../pages/auth/Login";
 import About from "../pages/public/About";
 import Bookings from "../pages/public/Booking";
 import BookNow from "../pages/public/BookNow";
+import Packages from "../pages/public/Packages";
 
 
 
@@ -14,19 +15,20 @@ const AppRoutes = () => {
     return (
         <Routes>
 
-            {/* Customer */}
+            {/* pages */}
             <Route path="/" element={<Home />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/about" element={<About />} />
             <Route path="/bookings" element={<Bookings />} />
             <Route path="/booknow" element={<BookNow />} />
+            <Route path="/packages" element={<Packages />} />
 
 
+            {/* Authentication */}
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
 
 
-            {/* Authentication */}
 
 
         </Routes>
