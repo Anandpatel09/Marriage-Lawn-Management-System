@@ -1,4 +1,4 @@
-import { Eye } from "lucide-react"
+import { Eye, EyeOff } from "lucide-react"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom";
 
@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 const Login = () => {
 
     const [role, setRole] = useState("customer");
+    const [showPassword, setShowPassword] = useState(false)
     const navigate = useNavigate()
     return (
         <div className="min-h-screen bg-[#17120f] flex items-center justify-center px-4 py-4">
@@ -95,15 +96,23 @@ const Login = () => {
                             <div className="relative w-full">
                                 <input
                                     id="password"
-                                    type="password"
+                                    type={showPassword ? "text" : "password"}
                                     placeholder="Password"
                                     className="w-full px-3 py-1.5 pr-10 bg-transparent border border-[#4b4039] rounded-lg text-sm text-white placeholder-[#80756f] outline-none focus:border-[#d8a849] transition"
                                 />
 
-                                <Eye
+                                {/* <Eye
                                     className="absolute right-3 top-1/2 -translate-y-1/2 text-[#80756f] cursor-pointer"
                                     size={18}
-                                />
+                                /> */}
+
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2"
+                                >
+                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                </button>
                             </div>
                         </div>
 
