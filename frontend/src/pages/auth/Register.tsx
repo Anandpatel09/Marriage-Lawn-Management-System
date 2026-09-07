@@ -2,6 +2,9 @@ import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import axiosInstance from "../../api/axios";
+import { API } from "../../api/api";
+import axios from "axios";
 
 const Register = () => {
 
@@ -65,8 +68,36 @@ const Register = () => {
   type RegisterFormData = z.infer<typeof schema>;
 
   // FORM SUBMIT 
-  const onSubmit = (data: RegisterFormData) => {
-    console.log("Form submitted:", data);
+  const onSubmit = async (data: RegisterFormData) => {
+
+    try {
+      const registerData = {
+        first_name: data.first_name,
+        last_name: data.last_name,
+        email: data.email,
+        mobile: data.mobile,
+        city: data.city,
+        password: data.password,
+      };
+
+      const response = await axiosInstance.post(
+        API.AUTH.REGISTER,
+        registerData
+      );
+      console.log(response.data);
+    }
+    catch (error) {
+  
+
+      if (axios.isAxiosError(error)) {
+        console.log(error.response?.data?.message);
+      } else {
+        console.log("Something went wrong");
+      }
+
+    }
+
+
   };
 
 
