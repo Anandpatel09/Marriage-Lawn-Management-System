@@ -72,7 +72,11 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const {
+            email,
+            password,
+            role,
+        } = req.body;
 
         // 1. Validate input
         if (!email || !password) {
@@ -83,17 +87,19 @@ export const login = async (req, res) => {
 
         // 2. Find user
         const [users] = await pool.execute(
-            `SELECT 
-        id,
-        first_name,
-        last_name,
-        email,
-        password_hash,
-        role,
-        is_verified
-       FROM users
-       WHERE email = ?`,
-            [email]
+            `SELECT
+                id,
+                first_name,
+                last_name,
+                email,
+                mobile,
+                city,
+                password_hash,
+                role,
+                is_verified
+             FROM users
+             WHERE email = ?`,
+            [email.trim()]
         );
 
         if (users.length === 0) {
@@ -104,14 +110,21 @@ export const login = async (req, res) => {
 
         const user = users[0];
 
-        // // 3. Check email verification
+        // 3. Check login role
+        if (role && user.role !== role) {
+            return res.status(403).json({
+                message: `This account is registered as ${user.role}`,
+            });
+        }
+
+        // 4. Check email verification
         // if (!user.is_verified) {
         //     return res.status(403).json({
         //         message: "Please verify your email first",
         //     });
         // }
 
-        // 4. Compare password
+        // 5. Compare password
         const passwordMatch = await bcrypt.compare(
             password,
             user.password_hash
@@ -123,7 +136,7 @@ export const login = async (req, res) => {
             });
         }
 
-        // 5. Create access token
+        // 6. Create access token
         const accessToken = jwt.sign(
             {
                 userId: user.id,
@@ -135,7 +148,7 @@ export const login = async (req, res) => {
             }
         );
 
-        // 6. Create refresh token
+        // 7. Create refresh token
         const refreshToken = jwt.sign(
             {
                 userId: user.id,
@@ -146,23 +159,23 @@ export const login = async (req, res) => {
             }
         );
 
-        // 7. Hash refresh token before storing it
+        // 8. Hash refresh token
         const refreshTokenHash = crypto
             .createHash("sha256")
             .update(refreshToken)
             .digest("hex");
 
-        // 8. Save session
+        // 9. Save session
         await pool.execute(
             `INSERT INTO sessions
-        (
-          user_id,
-          refresh_token_hash,
-          user_agent,
-          ip_address,
-          expires_at
-        )
-       VALUES (?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL 7 DAY))`,
+            (
+                user_id,
+                refresh_token_hash,
+                user_agent,
+                ip_address,
+                expires_at
+            )
+            VALUES (?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL 7 DAY))`,
             [
                 user.id,
                 refreshTokenHash,
@@ -171,7 +184,7 @@ export const login = async (req, res) => {
             ]
         );
 
-        // 9. Put refresh token in HttpOnly cookie
+        // 10. Set refresh token cookie
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
@@ -179,7 +192,7 @@ export const login = async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
-        // 10. Send response
+        // 11. Send response
         return res.status(200).json({
             message: "Login successful",
 
@@ -188,6 +201,8 @@ export const login = async (req, res) => {
                 first_name: user.first_name,
                 last_name: user.last_name,
                 email: user.email,
+                mobile: user.mobile,
+                city: user.city,
                 role: user.role,
             },
 
