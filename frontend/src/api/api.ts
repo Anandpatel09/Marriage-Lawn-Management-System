@@ -2,10 +2,13 @@ export const API = {
   AUTH: {
     REGISTER: "/api/auth/register",
     LOGIN: "/api/auth/login",
-    ME: "/auth/me",
-    LOGOUT: "/auth/logout",
+    ME: "/api/auth/me",
+    LOGOUT: "/api/auth/logout",
     REFRESH_TOKEN: "/auth/refresh-token",
     VERIFY_EMAIL: "/auth/verify-email",
+
+    FORGOT_PASSWORD: "/api/auth/forgot-password",
+    RESET_PASSWORD: "/api/auth/reset-password",
   },
 
   //   USER: {

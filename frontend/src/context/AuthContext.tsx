@@ -6,7 +6,6 @@ import {
     type ReactNode,
 } from "react";
 
-import axios from "axios";
 import axiosInstance from "../api/axios";
 import { API } from "../api/api";
 
@@ -18,7 +17,7 @@ interface User {
     mobile?: string;
     city?: string;
     role: "customer" | "admin";
-};
+}
 
 interface AuthContextType {
     user: User | null;
@@ -26,7 +25,7 @@ interface AuthContextType {
     isAuthenticated: boolean;
     logout: () => Promise<void>;
     setUser: (user: User | null) => void;
-};
+}
 
 const AuthContext = createContext<AuthContextType | undefined>(
     undefined
@@ -40,12 +39,13 @@ export const AuthProvider = ({
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
+    // Check whether the user is already logged in
     const checkAuth = async () => {
         try {
             const accessToken =
                 localStorage.getItem("accessToken");
 
-            // No token means user is not logged in
+            // No access token = not logged in
             if (!accessToken) {
                 setUser(null);
                 return;
@@ -78,22 +78,18 @@ export const AuthProvider = ({
         checkAuth();
     }, []);
 
+    // Logout
     const logout = async () => {
         try {
             await axiosInstance.post(API.AUTH.LOGOUT);
         } catch (error) {
-            if (axios.isAxiosError(error)) {
-                console.error(
-                    error.response?.data?.message ||
-                    "Logout failed"
-                );
-            } else {
-                console.error("Logout failed");
-            }
+            console.error("Logout API error:", error);
         } finally {
+            // Remove frontend authentication data
             localStorage.removeItem("accessToken");
             localStorage.removeItem("user");
 
+            // Update React authentication state
             setUser(null);
         }
     };

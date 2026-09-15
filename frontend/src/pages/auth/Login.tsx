@@ -1,6 +1,6 @@
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -8,8 +8,7 @@ import axios from "axios";
 
 import axiosInstance from "../../api/axios";
 import { API } from "../../api/api";
-
-// ==================== VALIDATION ====================
+import { useAuth } from "../../context/AuthContext";
 
 const schema = z.object({
   email: z
@@ -24,24 +23,15 @@ const schema = z.object({
 
 type LoginFormData = z.infer<typeof schema>;
 
-// ==================== COMPONENT ====================
-
 const Login = () => {
   const navigate = useNavigate();
 
-  // Selected login type in UI
+  const { setUser } = useAuth();
+
   const [role, setRole] = useState<"customer" | "admin">("customer");
-
-  // Password visibility
   const [showPassword, setShowPassword] = useState(false);
-
-  // Loading state
   const [loading, setLoading] = useState(false);
-
-  // API error message
   const [serverError, setServerError] = useState("");
-
-  // ==================== FORM ====================
 
   const {
     register,
@@ -51,8 +41,6 @@ const Login = () => {
     resolver: zodResolver(schema),
   });
 
-  // ==================== LOGIN ====================
-
   const onSubmit = async (data: LoginFormData) => {
     try {
       setLoading(true);
@@ -61,7 +49,7 @@ const Login = () => {
       const loginData = {
         email: data.email.trim(),
         password: data.password,
-        role: role,
+        role,
       };
 
       const response = await axiosInstance.post(
@@ -69,38 +57,32 @@ const Login = () => {
         loginData
       );
 
-      console.log("Login successful:", response.data);
+      console.log("Login response:", response.data);
 
-      const {
-        accessToken,
-        user,
-      } = response.data;
+      const { accessToken, user } = response.data;
 
-      // Make sure backend returned required data
       if (!accessToken || !user) {
-        throw new Error("Invalid login response from server");
+        throw new Error("Invalid response from server");
       }
 
-      // ------------------------------------------------
-      // Temporary while you are developing:
-      // Store access token in localStorage.
-      // Later we can move this to AuthContext/state.
-      // ------------------------------------------------
+      // Store token temporarily during development
       localStorage.setItem("accessToken", accessToken);
 
-      // Store basic user information
-      localStorage.setItem("user", JSON.stringify(user));
+      // Store user information
+      localStorage.setItem(
+        "user",
+        JSON.stringify(user)
+      );
 
-      // ------------------------------------------------
-      // IMPORTANT:
-      // Use the role returned by backend/database.
-      // Do NOT trust only the role selected in frontend.
-      // ------------------------------------------------
+      // VERY IMPORTANT:
+      // Update React authentication state
+      setUser(user);
 
+      // Use the role returned by backend
       if (user.role === "admin") {
         navigate("/admin/dashboard");
       } else if (user.role === "customer") {
-        navigate("/");
+        navigate("/home");
       } else {
         setServerError("Invalid user role.");
       }
@@ -109,11 +91,10 @@ const Login = () => {
       console.error("Login error:", error);
 
       if (axios.isAxiosError(error)) {
-        const message =
+        setServerError(
           error.response?.data?.message ||
-          "Login failed. Please try again.";
-
-        setServerError(message);
+          "Login failed. Please try again."
+        );
       } else if (error instanceof Error) {
         setServerError(error.message);
       } else {
@@ -125,8 +106,6 @@ const Login = () => {
     }
   };
 
-  // ==================== JSX ====================
-
   return (
     <div className="min-h-screen bg-[#17120f] flex items-center justify-center px-4 py-4">
 
@@ -134,8 +113,7 @@ const Login = () => {
 
         <div className="w-full p-7">
 
-          {/* ================= LOGO ================= */}
-
+          {/* Logo */}
           <div className="flex items-center gap-3 mb-3">
 
             <div className="w-14 h-9 bg-[#a94b3f] rounded-lg flex items-center justify-center text-white text-xl">
@@ -148,9 +126,7 @@ const Login = () => {
 
           </div>
 
-
-          {/* ================= HEADING ================= */}
-
+          {/* Heading */}
           <h1 className="text-2xl font-semibold text-white mb-1">
             Welcome back
           </h1>
@@ -159,12 +135,8 @@ const Login = () => {
             Sign in to continue.
           </p>
 
-
-          {/* ================= ROLE TOGGLE ================= */}
-
+          {/* Role Toggle */}
           <div className="w-full flex p-1 bg-[#332a25] rounded-lg mb-4">
-
-            {/* Customer */}
 
             <button
               type="button"
@@ -172,17 +144,13 @@ const Login = () => {
                 setRole("customer");
                 setServerError("");
               }}
-              className={`w-1/2 py-1.5 rounded-md text-sm font-medium transition ${
-                role === "customer"
-                  ? "bg-[#17120f] text-white"
-                  : "text-[#b8aea8] hover:text-white"
-              }`}
+              className={`w-1/2 py-1.5 rounded-md text-sm font-medium transition ${role === "customer"
+                ? "bg-[#17120f] text-white"
+                : "text-[#b8aea8] hover:text-white"
+                }`}
             >
               Customer
             </button>
-
-
-            {/* Admin */}
 
             <button
               type="button"
@@ -190,20 +158,17 @@ const Login = () => {
                 setRole("admin");
                 setServerError("");
               }}
-              className={`w-1/2 py-1.5 rounded-md text-sm font-medium transition ${
-                role === "admin"
-                  ? "bg-[#17120f] text-white"
-                  : "text-[#b8aea8] hover:text-white"
-              }`}
+              className={`w-1/2 py-1.5 rounded-md text-sm font-medium transition ${role === "admin"
+                ? "bg-[#17120f] text-white"
+                : "text-[#b8aea8] hover:text-white"
+                }`}
             >
               Admin
             </button>
 
           </div>
 
-
-          {/* ================= SERVER ERROR ================= */}
-
+          {/* Server Error */}
           {serverError && (
             <div className="mb-4 px-3 py-2 rounded-md border border-red-500/30 bg-red-500/10">
               <p className="text-red-400 text-xs">
@@ -212,16 +177,13 @@ const Login = () => {
             </div>
           )}
 
-
-          {/* ================= FORM ================= */}
-
+          {/* Form */}
           <form
             onSubmit={handleSubmit(onSubmit)}
             className="space-y-3"
           >
 
-            {/* ================= EMAIL ================= */}
-
+            {/* Email */}
             <div>
 
               <label
@@ -237,11 +199,10 @@ const Login = () => {
                 autoComplete="email"
                 placeholder="Enter email"
                 {...register("email")}
-                className={`w-full px-3 py-1.5 bg-transparent border rounded-lg text-sm text-white placeholder-[#80756f] outline-none transition ${
-                  errors.email
-                    ? "border-red-500 focus:border-red-500"
-                    : "border-[#4b4039] focus:border-[#d8a849]"
-                }`}
+                className={`w-full px-3 py-1.5 bg-transparent border rounded-lg text-sm text-white placeholder-[#80756f] outline-none transition ${errors.email
+                  ? "border-red-500 focus:border-red-500"
+                  : "border-[#4b4039] focus:border-[#d8a849]"
+                  }`}
               />
 
               {errors.email && (
@@ -252,9 +213,7 @@ const Login = () => {
 
             </div>
 
-
-            {/* ================= PASSWORD ================= */}
-
+            {/* Password */}
             <div>
 
               <label
@@ -272,11 +231,10 @@ const Login = () => {
                   autoComplete="current-password"
                   placeholder="Password"
                   {...register("password")}
-                  className={`w-full px-3 py-1.5 pr-10 bg-transparent border rounded-lg text-sm text-white placeholder-[#80756f] outline-none transition ${
-                    errors.password
-                      ? "border-red-500 focus:border-red-500"
-                      : "border-[#4b4039] focus:border-[#d8a849]"
-                  }`}
+                  className={`w-full px-3 py-1.5 pr-10 bg-transparent border rounded-lg text-sm text-white placeholder-[#80756f] outline-none transition ${errors.password
+                    ? "border-red-500 focus:border-red-500"
+                    : "border-[#4b4039] focus:border-[#d8a849]"
+                    }`}
                 />
 
                 <button
@@ -285,11 +243,6 @@ const Login = () => {
                     setShowPassword((prev) => !prev)
                   }
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-[#a99e98] hover:text-white transition"
-                  aria-label={
-                    showPassword
-                      ? "Hide password"
-                      : "Show password"
-                  }
                 >
                   {showPassword ? (
                     <EyeOff size={18} />
@@ -309,8 +262,18 @@ const Login = () => {
             </div>
 
 
-            {/* ================= LOGIN BUTTON ================= */}
+            {/* forget password  */}
 
+            <div className="flex justify-end">
+              <Link
+                to="/forgot-password"
+                className="text-sm text-[#d8a849] hover:underline"
+              >
+                Forgot Password?
+              </Link>
+            </div>
+
+            {/* Login */}
             <button
               type="submit"
               disabled={loading}
@@ -321,9 +284,7 @@ const Login = () => {
 
           </form>
 
-
-          {/* ================= REGISTER ================= */}
-
+          {/* Register */}
           <p className="text-center text-xs text-[#a99e98] mt-4">
 
             New here?{" "}
@@ -338,9 +299,7 @@ const Login = () => {
           </p>
 
         </div>
-
       </div>
-
     </div>
   );
 };

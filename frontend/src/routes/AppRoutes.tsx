@@ -1,7 +1,8 @@
-
-
-
-import { Routes, Route } from "react-router-dom";
+import {
+    Navigate,
+    Routes,
+    Route,
+} from "react-router-dom";
 
 import Home from "../pages/public/Home";
 import Contact from "../pages/public/Contact";
@@ -11,32 +12,69 @@ import Packages from "../pages/public/Packages";
 import Register from "../pages/auth/Register";
 import Login from "../pages/auth/Login";
 
+import ForgotPassword from "../pages/auth/ForgotPassword";
+import ResetPassword from "../pages/auth/ResetPassword";
+
 import Bookings from "../pages/public/Booking";
 import BookNow from "../pages/public/BookNow";
 
 import ProtectedRoute from "./ProtectedRoute";
 import AdminRoute from "./AdminRoute";
-// import AdminRoute from "../components/auth/AdminRoute";
 
 const AppRoutes = () => {
     return (
         <Routes>
 
-            {/* ================= PUBLIC ROUTES ================= */}
+            {/* ================= AUTH ================= */}
 
-            <Route path="/" element={<Home />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/packages" element={<Packages />} />
+            <Route
+                path="/"
+                element={
+                    <Navigate
+                        to="/login"
+                        replace
+                    />
+                }
+            />
 
-            {/* Authentication */}
-            <Route path="/register" element={<Register />} />
-            <Route path="/login" element={<Login />} />
+            <Route
+                path="/login"
+                element={<Login />}
+            />
+
+            <Route
+                path="/register"
+                element={<Register />}
+            />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+
+            {/* ================= PUBLIC ================= */}
+
+            <Route
+                path="/contact"
+                element={<Contact />}
+            />
+
+            <Route
+                path="/about"
+                element={<About />}
+            />
+
+            <Route
+                path="/packages"
+                element={<Packages />}
+            />
 
 
-            {/* ================= CUSTOMER / AUTHENTICATED ROUTES ================= */}
+            {/* ================= PROTECTED ================= */}
 
             <Route element={<ProtectedRoute />}>
+
+                <Route
+                    path="/home"
+                    element={<Home />}
+                />
 
                 <Route
                     path="/bookings"
@@ -51,13 +89,17 @@ const AppRoutes = () => {
             </Route>
 
 
-            {/* ================= ADMIN ROUTES ================= */}
+            {/* ================= ADMIN ================= */}
 
             <Route element={<AdminRoute />}>
 
                 <Route
                     path="/admin/dashboard"
-                    element={<div>Admin Dashboard</div>}
+                    element={
+                        <div>
+                            Admin Dashboard
+                        </div>
+                    }
                 />
 
             </Route>
