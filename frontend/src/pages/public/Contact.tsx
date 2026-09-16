@@ -7,8 +7,38 @@ import {
 
 import Navbar from "../../components/comman/Navbar";
 import Footer from "../../components/comman/Footer";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 
+interface contactdata {
+name:String,
+mobile:String,
+email:String,
+date:String,
+
+}
 const Contact = () => {
+  const [contactData, setContactData] = useState({});
+  const [loading, setloading] = useState(false);
+  
+
+  const {
+    register,
+    handleSubmit,
+    // formState: { errors },
+  } = useForm();
+
+
+  const onSubmit = async (data:contactdata) => {
+    try {
+
+    } catch (error) {
+      console.error("Login error:", error);
+
+    }
+  };
+
+
   return (
     <div className="min-h-dvh flex flex-col bg-[#17120f] text-white">
 
@@ -42,7 +72,10 @@ const Contact = () => {
                 Send an enquiry
               </h2>
 
-              <form className="space-y-5">
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="space-y-3"
+              >
 
                 {/* Name + Mobile */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -59,6 +92,7 @@ const Contact = () => {
                       id="name"
                       type="text"
                       placeholder="Your name"
+                      {...register("name")}
                       className="w-full h-9 px-3 bg-transparent border border-[#4b4039] rounded-md text-sm text-white placeholder-[#81756e] outline-none focus:border-[#d8a849] transition"
                     />
                   </div>
@@ -76,6 +110,7 @@ const Contact = () => {
                       id="mobile"
                       type="tel"
                       placeholder="+91 98290 00000"
+                      {...register("mobile")}
                       className="w-full h-9 px-3 bg-transparent border border-[#4b4039] rounded-md text-sm text-white placeholder-[#81756e] outline-none focus:border-[#d8a849] transition"
                     />
                   </div>
@@ -96,6 +131,7 @@ const Contact = () => {
                     id="email"
                     type="email"
                     placeholder="you@example.com"
+                    {...register("email")}
                     className="w-full h-9 px-3 bg-transparent border border-[#4b4039] rounded-md text-sm text-white placeholder-[#81756e] outline-none focus:border-[#d8a849] transition"
                   />
                 </div>
@@ -107,12 +143,13 @@ const Contact = () => {
                     htmlFor="date"
                     className="block text-xs font-medium mb-1.5"
                   >
-                    Tentative date
+                    Tentative date of Booking
                   </label>
 
                   <input
                     id="date"
                     type="date"
+                    {...register("date")}
                     className="w-full h-9 px-3 bg-transparent border border-[#4b4039] rounded-md text-sm text-white outline-none focus:border-[#d8a849] transition [color-scheme:dark]"
                   />
                 </div>
@@ -139,9 +176,10 @@ const Contact = () => {
                 {/* Submit */}
                 <button
                   type="submit"
+                  disabled={loading}
                   className="px-5 py-2 bg-[#d8a849] hover:bg-[#c99a3d] text-black text-sm font-medium rounded-md transition"
                 >
-                  Send enquiry
+                  {loading ? "Sending enquiry...." : "succsesfully send enqury"}
                 </button>
 
               </form>
@@ -167,7 +205,7 @@ const Contact = () => {
                 />
 
                 <span className="text-sm text-[#b8aaa1]">
-                  +91 9335056579
+                  +91 9919979529
                 </span>
 
               </div>
@@ -227,8 +265,8 @@ const Contact = () => {
         </div>
 
       </main>
-{/* Footer */}
-      <Footer/>
+      {/* Footer */}
+      <Footer />
 
     </div>
   );
