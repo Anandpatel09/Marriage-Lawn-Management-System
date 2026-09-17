@@ -4,10 +4,14 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 
 import authRoutes from "./routes/auth.routes.js";
+import contactRouter from "./routes/contact.routes.js";
 
 dotenv.config();
 
 const app = express();
+
+
+// ================= CORS =================
 
 app.use(
   cors({
@@ -16,22 +20,30 @@ app.use(
   })
 );
 
-app.use(express.json());
 
+// ================= MIDDLEWARE =================
+
+app.use(express.json());
 app.use(cookieParser());
 
 
-//AUTH ROUTES 
+// ================= AUTH ROUTES =================
 
 app.use("/api/auth", authRoutes);
 
 
-// TEST ROUTE
+// ================= CONTACT ROUTES =================
+
+app.use("/api/contact", contactRouter);
+
+
+// ================= TEST ROUTE =================
 
 app.get("/", (req, res) => {
   res.json({
     message: "Marriage Lawn Management API is running",
   });
 });
+
 
 export default app;

@@ -11,6 +11,10 @@ export const API = {
     RESET_PASSWORD: "/api/auth/reset-password",
   },
 
+  CONTACT:{
+            ENQUIRY: "/api/contact/enquiry"
+
+  }
   //   USER: {
   //     PROFILE: "/api/user/profile",
   //     UPDATE_PROFILE: "/api/user/profile",

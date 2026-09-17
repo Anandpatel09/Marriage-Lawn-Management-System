@@ -9,48 +9,59 @@ import Navbar from "../../components/comman/Navbar";
 import Footer from "../../components/comman/Footer";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import axiosInstance from "../../api/axios";
+import { API } from "../../api/api";
 
-interface contactdata {
-name:String,
-mobile:String,
-email:String,
-date:String,
-
+interface ContactData {
+  name: string;
+  mobile: string;
+  email: string;
+  date: string;
+  message: string;
 }
+
 const Contact = () => {
-  const [contactData, setContactData] = useState({});
-  const [loading, setloading] = useState(false);
-  
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const {
     register,
     handleSubmit,
-    // formState: { errors },
-  } = useForm();
+  } = useForm<ContactData>();
 
+  const onSubmit = async (data: ContactData) => {
+     try {
+        setLoading(true);
+        setSuccessMessage("");
 
-  const onSubmit = async (data:contactdata) => {
-    try {
+        const response = await axiosInstance.post(
+            API.CONTACT.ENQUIRY,
+            data
+        );
+        console.log("Full Response:", response);
+        setSuccessMessage(response.data.message);
 
-    } catch (error) {
-      console.error("Login error:", error);
+    } catch (error: any) {
+        console.error("Contact form error:", error);
 
+        setErrorMessage(
+            error.response?.data?.message ||
+            "Failed to send enquiry"
+        );
+    } finally {
+        setLoading(false);
     }
   };
-
 
   return (
     <div className="min-h-dvh flex flex-col bg-[#17120f] text-white">
 
-      {/* Navbar */}
       <Navbar />
 
-      {/* Main */}
       <main className="flex-1 px-4 py-8 sm:px-6">
-
         <div className="w-full max-w-5xl mx-auto">
 
-          {/* Heading */}
           <div className="mb-10">
             <h1 className="text-3xl sm:text-4xl font-normal text-white">
               Contact us
@@ -61,12 +72,10 @@ const Contact = () => {
             </p>
           </div>
 
-
-          {/* Cards */}
           <div className="grid grid-cols-1 lg:grid-cols-[2fr_0.9fr] gap-6">
 
-            {/* ================= FORM ================= */}
-            <div className="border border-[#4a4039] bg-[#241d18] rounded-xl p-6">
+            {/* FORM */}
+            <div className="border border-[#4a4039] bg-[#241d18] rounded-xl p-4 sm:p-6">
 
               <h2 className="text-lg font-semibold mb-8">
                 Send an enquiry
@@ -74,7 +83,7 @@ const Contact = () => {
 
               <form
                 onSubmit={handleSubmit(onSubmit)}
-                className="space-y-3"
+                className="space-y-4"
               >
 
                 {/* Name + Mobile */}
@@ -93,10 +102,9 @@ const Contact = () => {
                       type="text"
                       placeholder="Your name"
                       {...register("name")}
-                      className="w-full h-9 px-3 bg-transparent border border-[#4b4039] rounded-md text-sm text-white placeholder-[#81756e] outline-none focus:border-[#d8a849] transition"
+                      className="w-full h-10 px-3 bg-transparent border border-[#4b4039] rounded-md text-sm text-white placeholder-[#81756e] outline-none focus:border-[#d8a849]"
                     />
                   </div>
-
 
                   <div>
                     <label
@@ -111,12 +119,11 @@ const Contact = () => {
                       type="tel"
                       placeholder="+91 98290 00000"
                       {...register("mobile")}
-                      className="w-full h-9 px-3 bg-transparent border border-[#4b4039] rounded-md text-sm text-white placeholder-[#81756e] outline-none focus:border-[#d8a849] transition"
+                      className="w-full h-10 px-3 bg-transparent border border-[#4b4039] rounded-md text-sm text-white placeholder-[#81756e] outline-none focus:border-[#d8a849]"
                     />
                   </div>
 
                 </div>
-
 
                 {/* Email */}
                 <div>
@@ -132,10 +139,9 @@ const Contact = () => {
                     type="email"
                     placeholder="you@example.com"
                     {...register("email")}
-                    className="w-full h-9 px-3 bg-transparent border border-[#4b4039] rounded-md text-sm text-white placeholder-[#81756e] outline-none focus:border-[#d8a849] transition"
+                    className="w-full h-10 px-3 bg-transparent border border-[#4b4039] rounded-md text-sm text-white placeholder-[#81756e] outline-none focus:border-[#d8a849]"
                   />
                 </div>
-
 
                 {/* Date */}
                 <div>
@@ -150,10 +156,9 @@ const Contact = () => {
                     id="date"
                     type="date"
                     {...register("date")}
-                    className="w-full h-9 px-3 bg-transparent border border-[#4b4039] rounded-md text-sm text-white outline-none focus:border-[#d8a849] transition [color-scheme:dark]"
+                    className="w-full h-10 px-3 bg-transparent border border-[#4b4039] rounded-md text-sm text-white outline-none focus:border-[#d8a849] [color-scheme:dark]"
                   />
                 </div>
-
 
                 {/* Message */}
                 <div>
@@ -168,32 +173,41 @@ const Contact = () => {
                     id="message"
                     rows={4}
                     placeholder="Tell us about your event"
-                    className="w-full px-3 py-2 bg-transparent border border-[#4b4039] rounded-md text-sm text-white placeholder-[#81756e] outline-none focus:border-[#d8a849] transition resize-none"
+                    {...register("message")}
+                    className="w-full px-3 py-2 bg-transparent border border-[#4b4039] rounded-md text-sm text-white placeholder-[#81756e] outline-none focus:border-[#d8a849] resize-none"
                   />
                 </div>
 
+                {/* Success */}
+                {successMessage && (
+                  <p className="text-green-400 text-sm">
+                    {successMessage}
+                  </p>
+                )}
 
                 {/* Submit */}
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-5 py-2 bg-[#d8a849] hover:bg-[#c99a3d] text-black text-sm font-medium rounded-md transition"
+                  className="w-full sm:w-auto px-5 py-2.5 bg-[#d8a849] hover:bg-[#c99a3d] text-black text-sm font-medium rounded-md transition disabled:opacity-50"
                 >
-                  {loading ? "Sending enquiry...." : "succsesfully send enqury"}
+                  {loading
+                    ? "Sending enquiry..."
+                    : "Send Enquiry"}
                 </button>
 
               </form>
-
             </div>
 
+            {/* REACH US */}
+            <div className="border border-[#4a4039] bg-[#241d18] rounded-xl p-4 sm:p-6">
+              {/* your existing Reach Us content */}
 
-            {/* ================= REACH US ================= */}
-            <div className="border border-[#4a4039] bg-[#241d18] rounded-xl p-6">
 
               <h2 className="text-lg font-semibold mb-7">
                 Reach us
               </h2>
-
+    
 
               {/* Phone */}
               <div className="flex items-start gap-3 mb-5">
@@ -258,16 +272,15 @@ const Contact = () => {
 
               </div>
 
+            
+              
             </div>
 
           </div>
-
         </div>
-
       </main>
-      {/* Footer */}
-      <Footer />
 
+      <Footer />
     </div>
   );
 };
