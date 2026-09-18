@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 
 import axiosInstance from "../../api/axios";
-import { API } from "../../api/api";
+import { API } from "../../api/api-constant";
 import { useAuth } from "../../context/AuthContext";
 
 const schema = z.object({

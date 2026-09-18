@@ -14,7 +14,7 @@ import {
   Wallet,
   X,
 } from "lucide-react";
-import  { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const menuItems = [
@@ -110,7 +110,7 @@ const AdminAside = () => {
           left-0
           z-50
           h-screen
-          w-[270px]
+          w-[230px]
           bg-[#1e1814]
           border-r
           border-[#332a25]
@@ -128,7 +128,7 @@ const AdminAside = () => {
           <div className="flex items-center gap-3">
             <div
               className="
-                w-10
+                w-15
                 h-10
                 rounded-lg
                 bg-[#d8a849]
@@ -144,7 +144,9 @@ const AdminAside = () => {
             </div>
 
             <div>
-              <h1 className="text-white text-lg font-serif">Vivaah Lawns</h1>
+              <h1 className="text-white text-l font-serif">
+                Durga Marriage Lawn
+              </h1>
 
               <p className="text-[#a89b92] text-[11px] tracking-[0.16em]">
                 ADMIN CONSOLE

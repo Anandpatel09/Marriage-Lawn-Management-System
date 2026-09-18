@@ -7,7 +7,7 @@ import {
 } from "react";
 
 import axiosInstance from "../api/axios";
-import { API } from "../api/api";
+import { API } from "../api/api-constant";
 
 interface User {
     id: number;

@@ -4,7 +4,7 @@ export const API = {
     LOGIN: "/api/auth/login",
     ME: "/api/auth/me",
     LOGOUT: "/api/auth/logout",
-    REFRESH_TOKEN: "/auth/refresh-token",
+    REFRESH_TOKEN: "/api/auth/refresh-token",
     VERIFY_EMAIL: "/auth/verify-email",
 
     FORGOT_PASSWORD: "/api/auth/forgot-password",

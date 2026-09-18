@@ -454,3 +454,95 @@ export const getMe = async (req, res) => {
         });
     }
 };
+
+
+//Referesh token  Controller
+
+export const refreshAccessToken = async (req, res) => {
+    try {
+        const refreshToken = req.cookies.refreshToken;
+
+        if (!refreshToken) {
+            return res.status(401).json({
+                message: "Refresh token not found",
+            });
+        }
+
+        // Verify refresh token
+        const decoded = jwt.verify(
+            refreshToken,
+            process.env.JWT_REFRESH_SECRET
+        );
+
+        const refreshTokenHash = crypto
+            .createHash("sha256")
+            .update(refreshToken)
+            .digest("hex");
+
+        // Check session
+        const [sessions] = await pool.execute(
+            `SELECT user_id
+             FROM sessions
+             WHERE refresh_token_hash = ?
+             AND revoked = FALSE
+             AND expires_at > NOW()
+             LIMIT 1`,
+            [refreshTokenHash]
+        );
+
+        if (sessions.length === 0) {
+            return res.status(401).json({
+                message: "Invalid or expired refresh token",
+            });
+        }
+
+        const userId = decoded.userId;
+
+        // Get current user
+        const [users] = await pool.execute(
+            `SELECT
+                id,
+                first_name,
+                last_name,
+                email,
+                mobile,
+                city,
+                role,
+                is_verified
+             FROM users
+             WHERE id = ?`,
+            [userId]
+        );
+
+        if (users.length === 0) {
+            return res.status(404).json({
+                message: "User not found",
+            });
+        }
+
+        const user = users[0];
+
+        // Create new access token
+        const accessToken = jwt.sign(
+            {
+                userId: user.id,
+                role: user.role,
+            },
+            process.env.JWT_ACCESS_SECRET,
+            {
+                expiresIn: "15m",
+            }
+        );
+
+        return res.status(200).json({
+            accessToken,
+        });
+
+    } catch (error) {
+        console.error("Refresh token error:", error);
+
+        return res.status(401).json({
+            message: "Invalid or expired refresh token",
+        });
+    }
+};

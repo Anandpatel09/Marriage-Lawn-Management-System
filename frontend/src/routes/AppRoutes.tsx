@@ -21,6 +21,7 @@ import BookNow from "../pages/public/BookNow";
 import ProtectedRoute from "./ProtectedRoute";
 import AdminRoute from "./AdminRoute";
 import AdminDashboard from "../pages/admin/AdminDashboard";
+import AdminProfile from "../pages/admin/adminNavbarData/AdminProfile";
 
 const AppRoutes = () => {
     return (
@@ -98,6 +99,11 @@ const AppRoutes = () => {
                     element={<AdminDashboard />}
                 />
             </Route>
+
+            <Route
+                path="/admin/profile"
+                element={<AdminProfile />}
+            />
 
         </Routes>
     );

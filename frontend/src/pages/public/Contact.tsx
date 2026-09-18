@@ -10,7 +10,7 @@ import Footer from "../../components/comman/Footer";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import axiosInstance from "../../api/axios";
-import { API } from "../../api/api";
+import { API } from "../../api/api-constant";
 
 interface ContactData {
   name: string;
@@ -31,26 +31,26 @@ const Contact = () => {
   } = useForm<ContactData>();
 
   const onSubmit = async (data: ContactData) => {
-     try {
-        setLoading(true);
-        setSuccessMessage("");
+    try {
+      setLoading(true);
+      setSuccessMessage("");
 
-        const response = await axiosInstance.post(
-            API.CONTACT.ENQUIRY,
-            data
-        );
-        console.log("Full Response:", response);
-        setSuccessMessage(response.data.message);
+      const response = await axiosInstance.post(
+        API.CONTACT.ENQUIRY,
+        data
+      );
+      console.log("Full Response:", response);
+      setSuccessMessage(response.data.message);
 
     } catch (error: any) {
-        console.error("Contact form error:", error);
+      console.error("Contact form error:", error);
 
-        setErrorMessage(
-            error.response?.data?.message ||
-            "Failed to send enquiry"
-        );
+      setErrorMessage(
+        error.response?.data?.message ||
+        "Failed to send enquiry"
+      );
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
   };
 
@@ -207,7 +207,7 @@ const Contact = () => {
               <h2 className="text-lg font-semibold mb-7">
                 Reach us
               </h2>
-    
+
 
               {/* Phone */}
               <div className="flex items-start gap-3 mb-5">
@@ -272,8 +272,8 @@ const Contact = () => {
 
               </div>
 
-            
-              
+
+
             </div>
 
           </div>

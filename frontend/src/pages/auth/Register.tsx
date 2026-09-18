@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axiosInstance from "../../api/axios";
-import { API } from "../../api/api";
+import { API } from "../../api/api-constant";
 import axios from "axios";
 
 const Register = () => {
@@ -87,7 +87,7 @@ const Register = () => {
       console.log(response.data);
     }
     catch (error) {
-  
+
 
       if (axios.isAxiosError(error)) {
         console.log(error.response?.data?.message);
