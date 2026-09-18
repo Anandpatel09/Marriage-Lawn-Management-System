@@ -22,6 +22,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import AdminRoute from "./AdminRoute";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import AdminProfile from "../pages/admin/adminNavbarData/AdminProfile";
+import UserProfile from "../pages/customer/UserProfile";
 
 const AppRoutes = () => {
     return (
@@ -72,6 +73,11 @@ const AppRoutes = () => {
             {/* ================= PROTECTED ================= */}
 
             <Route element={<ProtectedRoute />}>
+
+                <Route
+                    path="/profile"
+                    element={<UserProfile />}
+                />
 
                 <Route
                     path="/home"
