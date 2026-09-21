@@ -68,7 +68,7 @@ const Navbar = () => {
                         </Link>
 
                         <Link
-                            to="/bookings"
+                            to="/bookings-public"
                             className="px-3 py-2 rounded-lg text-[#aaa19b] hover:text-white text-sm"
                         >
                             Bookings

@@ -15,7 +15,7 @@ import Login from "../pages/auth/Login";
 import ForgotPassword from "../pages/auth/ForgotPassword";
 import ResetPassword from "../pages/auth/ResetPassword";
 
-import Bookings from "../pages/public/Booking";
+import BookingsPublic from "../pages/public/Booking-Public";
 import BookNow from "../pages/public/BookNow";
 
 import ProtectedRoute from "./ProtectedRoute";
@@ -23,6 +23,8 @@ import AdminRoute from "./AdminRoute";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import AdminProfile from "../pages/admin/adminNavbarData/AdminProfile";
 import UserProfile from "../pages/customer/UserProfile";
+import Availability from "../pages/admin/Availability";
+import Bookings from "../pages/admin/Booking/Bookings";
 
 const AppRoutes = () => {
     return (
@@ -85,8 +87,8 @@ const AppRoutes = () => {
                 />
 
                 <Route
-                    path="/bookings"
-                    element={<Bookings />}
+                    path="/bookings-public"
+                    element={<BookingsPublic />}
                 />
 
                 <Route
@@ -110,7 +112,15 @@ const AppRoutes = () => {
                 path="/admin/profile"
                 element={<AdminProfile />}
             />
+            <Route
+                path="/admin/availability"
+                element={<Availability />}
+            />
 
+            <Route
+                path="/admin/bookings"
+                element={<Bookings />}
+            />
         </Routes>
     );
 };

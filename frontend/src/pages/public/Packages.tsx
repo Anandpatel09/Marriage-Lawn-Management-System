@@ -1,4 +1,4 @@
-import React from "react";
+
 import { Check, Star } from "lucide-react";
 import Navbar from "../../components/comman/Navbar";
 import Footer from "../../components/comman/Footer";
