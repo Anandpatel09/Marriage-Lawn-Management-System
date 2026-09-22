@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -10,7 +10,7 @@ import Footer from "../../components/comman/Footer";
 
 const BookNow = () => {
   const [selectedDate, setSelectedDate] = useState(25);
-  const [ocas,setOcas]=useState("Wedding")
+  const [ocas, setOcas] = useState("Wedding")
   const [venue, setVenue] = useState("Marigold Garden Lawn");
   const [packageName, setPackageName] = useState("Golden Vivah");
   const [guests, setGuests] = useState(300);
@@ -27,7 +27,7 @@ const BookNow = () => {
   const gst = subtotal * 0.18;
   const total = subtotal + gst;
 
-  const formatPrice = (price:any) => {
+  const formatPrice = (price: any) => {
     return `₹${price.toLocaleString("en-IN")}`;
   };
 
@@ -71,20 +71,20 @@ const BookNow = () => {
   ];
 
   const occasions = [
-  "Wedding",
-  "Engagement",
-  "Reception",
-  "Sangeet",
-  "Mehndi",
-  "Haldi",
-  "Roka Ceremony",
-  "Birthday Party",
-  "Anniversary",
-  "Baby Shower",
-  "Corporate Event",
-  "Family Function",
-  "Other",
-];
+    "Wedding",
+    "Engagement",
+    "Reception",
+    "Sangeet",
+    "Mehndi",
+    "Haldi",
+    "Roka Ceremony",
+    "Birthday Party",
+    "Anniversary",
+    "Baby Shower",
+    "Corporate Event",
+    "Family Function",
+    "Other",
+  ];
 
   return (
     <div className="min-h-dvh flex flex-col bg-[#17120f] text-white">
@@ -176,11 +176,10 @@ const BookNow = () => {
                         <button
                           key={index}
                           onClick={() => setSelectedDate(number)}
-                          className={`h-6 text-[13px] rounded transition ${
-                            selectedDate === number
+                          className={`h-6 text-[13px] rounded transition ${selectedDate === number
                               ? "bg-[#a94b3f] text-white"
                               : "text-[#b8aaa1] hover:bg-[#342b25]"
-                          }`}
+                            }`}
                         >
                           {number}
                         </button>
@@ -217,7 +216,7 @@ const BookNow = () => {
                         Durga Marriage Lawn
                       </option>
 
-          
+
                     </select>
                   </div>
 
@@ -241,7 +240,7 @@ const BookNow = () => {
                         className="bg-[#241d18]"
                         value="Golden Vivah"
                       >
-                       Golden
+                        Golden
                       </option>
                     </select>
                   </div>
@@ -265,18 +264,18 @@ const BookNow = () => {
                         className="bg-[#241d18]"
                         value=""
                       >
-                       select Occasions
+                        select Occasions
                       </option>
-                      {occasions.map((occasion)=>(
-                         <option
-                        className="bg-[#241d18]"
-                        value={occasion}
-                        key={occasion}
-                      >
-                       {occasion}
-                      </option>
+                      {occasions.map((occasion) => (
+                        <option
+                          className="bg-[#241d18]"
+                          value={occasion}
+                          key={occasion}
+                        >
+                          {occasion}
+                        </option>
                       ))}
-                      
+
                     </select>
                   </div>
 
