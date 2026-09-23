@@ -11,10 +11,30 @@ export const API = {
     RESET_PASSWORD: "/api/auth/reset-password",
   },
 
-  CONTACT:{
-            ENQUIRY: "/api/contact/enquiry"
+  CONTACT: {
+    ENQUIRY: "/api/contact/enquiry",
+  },
 
-  }
+  VENUE: {
+    GET_ALL: "/api/venues",
+  },
+
+  PACKAGE: {
+    GET_ALL: "/api/packages",
+  },
+
+  AVAILABILITY: {
+    GET: "/api/availability",
+  },
+
+  BOOKING: {
+    CREATE: "/api/bookings",
+    MY_BOOKINGS: "/api/bookings/my-bookings",
+  },
+
+  // CONTACTS: {
+  //   ENQUIRY: "/contact/enquiry",
+  // },
   //   USER: {
   //     PROFILE: "/api/user/profile",
   //     UPDATE_PROFILE: "/api/user/profile",

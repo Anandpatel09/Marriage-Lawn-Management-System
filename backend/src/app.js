@@ -5,6 +5,11 @@ import dotenv from "dotenv";
 
 import authRoutes from "./routes/auth.routes.js";
 import contactRouter from "./routes/contact.routes.js";
+import availabilityRoutes from "./routes/availability.routes.js";
+import venueRoutes from "./routes/venue.routes.js";
+import packageRoutes from "./routes/package.routes.js";
+import bookingRoutes from "./routes/booking.routes.js";
+
 
 dotenv.config();
 
@@ -36,6 +41,26 @@ app.use("/api/auth", authRoutes);
 
 app.use("/api/contact", contactRouter);
 
+
+app.use(
+  "/api/availability",
+  availabilityRoutes
+);
+
+app.use(
+  "/api/venues",
+  venueRoutes
+);
+
+app.use(
+  "/api/packages",
+  packageRoutes
+);
+
+app.use(
+  "/api/bookings",
+  bookingRoutes
+);
 
 // ================= TEST ROUTE =================
 
