@@ -7,7 +7,7 @@ import {
     forgotPassword,
     resetPassword,
     getMe,
-    refreshAccessToken,
+    refreshToken,
 } from "../controllers/auth.controller.js";
 
 import { authenticate } from "../middlewares/auth.middlewae.js";
@@ -27,7 +27,7 @@ router.post("/forgot-password", forgotPassword);
 
 router.post("/reset-password", resetPassword);
 
-router.post("/refresh-token", refreshAccessToken);
+router.post("/refresh-token", refreshToken);
 
 
 // ================= CURRENT USER =================

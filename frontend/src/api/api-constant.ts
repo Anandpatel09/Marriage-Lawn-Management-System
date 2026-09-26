@@ -5,14 +5,9 @@ export const API = {
     ME: "/api/auth/me",
     LOGOUT: "/api/auth/logout",
     REFRESH_TOKEN: "/api/auth/refresh-token",
-    VERIFY_EMAIL: "/auth/verify-email",
-
+    VERIFY_EMAIL: "/api/auth/verify-email",
     FORGOT_PASSWORD: "/api/auth/forgot-password",
     RESET_PASSWORD: "/api/auth/reset-password",
-  },
-
-  CONTACT: {
-    ENQUIRY: "/api/contact/enquiry",
   },
 
   VENUE: {
@@ -32,18 +27,7 @@ export const API = {
     MY_BOOKINGS: "/api/bookings/my-bookings",
   },
 
-  // CONTACTS: {
-  //   ENQUIRY: "/contact/enquiry",
-  // },
-  //   USER: {
-  //     PROFILE: "/api/user/profile",
-  //     UPDATE_PROFILE: "/api/user/profile",
-  //   },
-
-  //   BOOKING: {
-  //     CREATE: "/api/bookings",
-  //     GET_ALL: "/api/bookings",
-  //     GET_BY_ID: (id: number | string) => `/api/bookings/${id}`,
-  //     DELETE: (id: number | string) => `/api/bookings/${id}`,
-  //   },
+  CONTACT: {
+    ENQUIRY: "/api/contact/enquiry",
+  },
 };
