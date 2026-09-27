@@ -398,8 +398,6 @@ const BookNow = () => {
     }
   };
 
-
-  console.log("jmfmfmeefewfwf", venues)
   // --------------------------------------------------
   // SELECTED DATE AVAILABILITY
   // --------------------------------------------------
@@ -635,8 +633,6 @@ const BookNow = () => {
                   >
                     <option value="Wedding">Wedding</option>
 
-                    <option value="Golden Vivah">Golden Vivah</option>
-
                     <option value="Engagement">Engagement</option>
 
                     <option value="Reception">Reception</option>
@@ -644,6 +640,64 @@ const BookNow = () => {
                     <option value="Birthday">Birthday</option>
 
                     <option value="Anniversary">Anniversary</option>
+
+                    <option value="Haldi Ceremony">Haldi Ceremony</option>
+
+                    <option value="Mehndi Ceremony">Mehndi Ceremony</option>
+
+                    <option value="Sangeet Ceremony">Sangeet Ceremony</option>
+
+                    <option value="Roka Ceremony">Roka Ceremony</option>
+
+                    <option value="Tilak Ceremony">Tilak Ceremony</option>
+
+                    <option value="Ring Ceremony">Ring Ceremony</option>
+
+                    <option value="Cocktail Party">Cocktail Party</option>
+
+                    <option value="Baby Shower">Baby Shower</option>
+
+                    <option value="Naming Ceremony">Naming Ceremony</option>
+
+                    <option value="Retirement Party">Retirement Party</option>
+
+                    <option value="Farewell Party">Farewell Party</option>
+
+                    <option value="Kitty Party">Kitty Party</option>
+
+                    <option value="Corporate Event">Corporate Event</option>
+
+                    <option value="Business Meeting">Business Meeting</option>
+
+                    <option value="Conference">Conference</option>
+
+                    <option value="Product Launch">Product Launch</option>
+
+                    <option value="Award Ceremony">Award Ceremony</option>
+
+                    <option value="Cultural Event">Cultural Event</option>
+
+                    <option value="Religious Ceremony">
+                      Religious Ceremony
+                    </option>
+
+                    <option value="Family Function">Family Function</option>
+
+                    <option value="Social Gathering">Social Gathering</option>
+
+                    <option value="Festival Celebration">
+                      Festival Celebration
+                    </option>
+
+                    <option value="Golden Jubilee">Golden Jubilee</option>
+
+                    <option value="Silver Jubilee">Silver Jubilee</option>
+
+                    <option value="Graduation Party">Graduation Party</option>
+
+                    <option value="Reunion">Reunion</option>
+
+                    <option value="Other">Other</option>
                   </select>
                 </div>
 
@@ -713,6 +767,21 @@ const BookNow = () => {
                 </div>
               </div>
 
+              {/* Address */}
+
+              <div className="mt-6">
+                <label className="block text-xs text-[#a39790] mb-2">
+                  Enter Your complete address
+                </label>
+
+                <textarea
+                  rows={2}
+                  value={requests}
+                  onChange={(e) => setRequests(e.target.value)}
+                  placeholder="Decoration, catering, parking, special arrangements..."
+                  className="w-full bg-[#201813] border border-[#4b4039] rounded-lg px-3 py-3 text-sm outline-none focus:border-[#d8a849] resize-none placeholder:text-[#625850]"
+                />
+              </div>
               {/* SPECIAL REQUESTS */}
 
               <div className="mt-6">

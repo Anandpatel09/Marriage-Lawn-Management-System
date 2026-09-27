@@ -16,7 +16,6 @@ export const getPackages = async (req, res) => {
       ORDER BY id ASC
       `,
     );
-
     return res.status(200).json({
       packages,
     });
