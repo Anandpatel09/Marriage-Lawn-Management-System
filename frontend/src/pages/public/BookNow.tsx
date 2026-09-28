@@ -398,9 +398,9 @@ const BookNow = () => {
     }
   };
 
-  // --------------------------------------------------
+  // --------------------------
   // SELECTED DATE AVAILABILITY
-  // --------------------------------------------------
+  // --------------------------
 
   const selectedDateAvailability = selectedDate
     ? availability[getDateKey(selectedDate)]
@@ -733,8 +733,7 @@ const BookNow = () => {
 
                     <input
                       type="text"
-                      value={user ? `${user.first_name} ${user.last_name}` : ""}
-                      readOnly
+                      // value={""}
                       className="w-full bg-[#201813] border border-[#3d332c] rounded-lg px-3 py-3 text-sm text-[#a39790]"
                     />
                   </div>
@@ -745,9 +744,8 @@ const BookNow = () => {
                     </label>
 
                     <input
-                      type="text"
-                      value={user?.mobile || ""}
-                      readOnly
+                      type="number"
+                      // value={""}
                       className="w-full bg-[#201813] border border-[#3d332c] rounded-lg px-3 py-3 text-sm text-[#a39790]"
                     />
                   </div>
@@ -759,8 +757,7 @@ const BookNow = () => {
 
                     <input
                       type="email"
-                      value={user?.email || ""}
-                      readOnly
+                      // value={""}
                       className="w-full bg-[#201813] border border-[#3d332c] rounded-lg px-3 py-3 text-sm text-[#a39790]"
                     />
                   </div>
