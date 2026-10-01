@@ -81,6 +81,8 @@ const BookNow = () => {
 
   const [packageId, setPackageId] = useState<number | null>(null);
 
+  const [loadingBooking, setLoadingBooking] = useState<boolean>(false);
+
   // ===================================================
   // BOOKING DETAILS
   // ===================================================
@@ -232,6 +234,7 @@ const BookNow = () => {
     fetchAvailability();
   }, [currentMonth, venueId]);
 
+
   // ===================================================
   // SELECTED PACKAGE
   // ===================================================
@@ -276,96 +279,56 @@ const BookNow = () => {
   // CREATE BOOKING
   // ===================================================
 
-  const handleBooking = async () => {
-    setSuccessMessage("");
+ const handleBooking = async () => {
+  try {
+    setLoadingBooking(true);
     setErrorMessage("");
-
-    // LOGIN CHECK
+    setSuccessMessage("");
 
     if (!isAuthenticated || !user) {
-      setErrorMessage("Please login before requesting a booking.");
-
+      setErrorMessage("Please login before booking.");
       return;
     }
-
-    // DATE CHECK
 
     if (!selectedDate) {
-      setErrorMessage("Please select a booking date.");
-
+      setErrorMessage("Please select a date.");
       return;
     }
 
-    // VENUE CHECK
-
-    if (!venueId) {
-      setErrorMessage("Please select a marriage lawn.");
-
+    if (!venueId || !packageId) {
+      setErrorMessage("Please select venue and package.");
       return;
     }
 
-    // PACKAGE CHECK
+    const bookingDate = getDateKey(selectedDate);
 
-    if (!packageId) {
-      setErrorMessage("Please select a package.");
+    await axiosInstance.post(API.BOOKING.CREATE, {
+      venueId,
+      packageId,
+      occasion,
+      bookingDate,
+      guests,
+      specialRequests: requests,
+    });
 
-      return;
-    }
+    setSuccessMessage("Booking request submitted successfully!");
 
-    // GUEST CHECK
+    // Refresh availability immediately
+    await fetchAvailability();
 
-    if (guests <= 0) {
-      setErrorMessage("Number of guests must be greater than 0.");
+    // Clear selected date if you want
+    setSelectedDate(null);
 
-      return;
-    }
+    setRequests("");
 
-    try {
-      setBookingLoading(true);
-
-      const response = await axiosInstance.post(API.BOOKING.CREATE, {
-        venueId,
-        packageId,
-        occasion,
-        bookingDate: getDateKey(selectedDate),
-        guests,
-        specialRequests: requests,
-
-        // These can be used
-        // if your backend supports them
-        customerName,
-        customerMobile,
-        customerEmail,
-        address,
-      });
-
-      setSuccessMessage(
-        response.data.message || "Booking request submitted successfully.",
-      );
-
-      // RESET FORM
-
-      setSelectedDate(null);
-
-      setRequests("");
-
-      setAddress("");
-
-      setCustomerName("");
-
-      setCustomerMobile("");
-
-      setCustomerEmail("");
-    } catch (error: any) {
-      console.error("Booking API error:", error);
-
-      setErrorMessage(
-        error.response?.data?.message || "Failed to create booking.",
-      );
-    } finally {
-      setBookingLoading(false);
-    }
-  };
+  } catch (error: any) {
+    setErrorMessage(
+      error?.response?.data?.message || "Failed to create booking."
+    );
+  } finally {
+    setLoadingBooking(false);
+  }
+};
 
   // =====================================================
   // RENDER
@@ -409,11 +372,11 @@ const BookNow = () => {
               selectedDate={selectedDate}
               availability={availability}
               loadingAvailability={loadingAvailability}
-              onMonthChange={(date: any) => {
+              onMonthChange={(date: Date) => {
                 setCurrentMonth(date);
                 setSelectedDate(null);
               }}
-              onDateSelect={(date: any) => {
+              onDateSelect={(date: Date) => {
                 setSelectedDate(date);
 
                 setSuccessMessage("");
