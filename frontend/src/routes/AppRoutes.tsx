@@ -16,7 +16,7 @@ import ForgotPassword from "../pages/auth/ForgotPassword";
 import ResetPassword from "../pages/auth/ResetPassword";
 
 import BookingsPublic from "../pages/public/Booking-Public";
-import BookNow from "../pages/public/BookNow";
+import BookNow from "../pages/public/BookNow/BookNow";
 
 import ProtectedRoute from "./ProtectedRoute";
 import AdminRoute from "./AdminRoute";

@@ -1,16 +1,17 @@
-import {
-  CalendarDays,
-  Check,
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
-} from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import Navbar from "../../components/comman/Navbar";
-import Footer from "../../components/comman/Footer";
-import axiosInstance from "../../api/axios";
-import { API } from "../../api/api-constant";
-import { useAuth } from "../../context/AuthContext";
+import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+
+import Navbar from "../../../components/comman/Navbar";
+import Footer from "../../../components/comman/Footer";
+import BookingCalendar from "./BookingCalender";
+
+import axiosInstance from "../../../api/axios";
+import { API } from "../../../api/api-constant";
+import { useAuth } from "../../../context/AuthContext";
+
+// =====================================================
+// TYPES
+// =====================================================
 
 interface Venue {
   id: number;
@@ -41,8 +42,16 @@ interface AvailabilityMap {
   };
 }
 
+// =====================================================
+// COMPONENT
+// =====================================================
+
 const BookNow = () => {
   const { user, isAuthenticated } = useAuth();
+
+  // ===================================================
+  // DATE
+  // ===================================================
 
   const today = new Date();
 
@@ -52,12 +61,29 @@ const BookNow = () => {
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
+  // ===================================================
+  // VENUES
+  // ===================================================
+
   const [venues, setVenues] = useState<Venue[]>([]);
-  const [packages, setPackages] = useState<Package[]>([]);
+
+  const [loadingVenues, setLoadingVenues] = useState(false);
 
   const [venueId, setVenueId] = useState<number | null>(null);
 
+  // ===================================================
+  // PACKAGES
+  // ===================================================
+
+  const [packages, setPackages] = useState<Package[]>([]);
+
+  const [loadingPackages, setLoadingPackages] = useState(false);
+
   const [packageId, setPackageId] = useState<number | null>(null);
+
+  // ===================================================
+  // BOOKING DETAILS
+  // ===================================================
 
   const [occasion, setOccasion] = useState("Wedding");
 
@@ -65,13 +91,29 @@ const BookNow = () => {
 
   const [requests, setRequests] = useState("");
 
+  const [address, setAddress] = useState("");
+
+  // ===================================================
+  // CUSTOMER INFORMATION
+  // ===================================================
+
+  const [customerName, setCustomerName] = useState("");
+
+  const [customerMobile, setCustomerMobile] = useState("");
+
+  const [customerEmail, setCustomerEmail] = useState("");
+
+  // ===================================================
+  // AVAILABILITY
+  // ===================================================
+
   const [availability, setAvailability] = useState<AvailabilityMap>({});
 
-  const [loadingVenues, setLoadingVenues] = useState(false);
-
-  const [loadingPackages, setLoadingPackages] = useState(false);
-
   const [loadingAvailability, setLoadingAvailability] = useState(false);
+
+  // ===================================================
+  // BOOKING STATE
+  // ===================================================
 
   const [bookingLoading, setBookingLoading] = useState(false);
 
@@ -79,65 +121,9 @@ const BookNow = () => {
 
   const [errorMessage, setErrorMessage] = useState("");
 
-  // --------------------------------------------------
-  // CALENDAR VALUES
-  // --------------------------------------------------
-
-  const year = currentMonth.getFullYear();
-  const month = currentMonth.getMonth();
-
-  const monthName = currentMonth.toLocaleString("en-IN", {
-    month: "long",
-  });
-
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-  const firstDayOfMonth = new Date(year, month, 1).getDay();
-
-  const calendarDays = useMemo(() => {
-    return [
-      ...Array(firstDayOfMonth).fill(null),
-      ...Array.from({ length: daysInMonth }, (_, index) => index + 1),
-    ];
-  }, [firstDayOfMonth, daysInMonth]);
-
-  // --------------------------------------------------
-  // DATE HELPERS
-  // --------------------------------------------------
-
-  const getDateKey = (date: Date) => {
-    const dateYear = date.getFullYear();
-    const dateMonth = String(date.getMonth() + 1).padStart(2, "0");
-
-    const dateDay = String(date.getDate()).padStart(2, "0");
-
-    return `${dateYear}-${dateMonth}-${dateDay}`;
-  };
-
-  const isPastDate = (day: number) => {
-    const date = new Date(year, month, day);
-
-    const currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0);
-
-    return date < currentDate;
-  };
-
-  const formatSelectedDate = () => {
-    if (!selectedDate) {
-      return "Select a date";
-    }
-
-    return selectedDate.toLocaleDateString("en-IN", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  };
-
-  // --------------------------------------------------
+  // ===================================================
   // FETCH VENUES
-  // --------------------------------------------------
+  // ===================================================
 
   const fetchVenues = async () => {
     try {
@@ -161,9 +147,9 @@ const BookNow = () => {
     }
   };
 
-  // --------------------------------------------------
+  // ===================================================
   // FETCH PACKAGES
-  // --------------------------------------------------
+  // ===================================================
 
   const fetchPackages = async () => {
     try {
@@ -187,9 +173,9 @@ const BookNow = () => {
     }
   };
 
-  // --------------------------------------------------
+  // ===================================================
   // FETCH AVAILABILITY
-  // --------------------------------------------------
+  // ===================================================
 
   const fetchAvailability = async () => {
     if (!venueId) {
@@ -203,8 +189,8 @@ const BookNow = () => {
       const response = await axiosInstance.get(API.AVAILABILITY.GET, {
         params: {
           venueId,
-          month: month + 1,
-          year,
+          month: currentMonth.getMonth() + 1,
+          year: currentMonth.getFullYear(),
         },
       });
 
@@ -229,32 +215,32 @@ const BookNow = () => {
     }
   };
 
-  // --------------------------------------------------
+  // ===================================================
   // INITIAL API CALLS
-  // --------------------------------------------------
+  // ===================================================
 
   useEffect(() => {
     fetchVenues();
     fetchPackages();
   }, []);
 
-  // --------------------------------------------------
-  // FETCH AVAILABILITY WHEN MONTH/VENUE CHANGES
-  // --------------------------------------------------
+  // ===================================================
+  // FETCH AVAILABILITY
+  // ===================================================
 
   useEffect(() => {
     fetchAvailability();
   }, [currentMonth, venueId]);
 
-  // --------------------------------------------------
+  // ===================================================
   // SELECTED PACKAGE
-  // --------------------------------------------------
+  // ===================================================
 
   const selectedPackage = packages.find((pkg) => pkg.id === packageId);
 
-  // --------------------------------------------------
+  // ===================================================
   // PRICE CALCULATION
-  // --------------------------------------------------
+  // ===================================================
 
   const basePrice = selectedPackage?.base_price || 0;
 
@@ -272,100 +258,65 @@ const BookNow = () => {
 
   const total = subtotal + gst;
 
-  // --------------------------------------------------
-  // MONTH NAVIGATION
-  // --------------------------------------------------
+  // ===================================================
+  // DATE FORMAT
+  // ===================================================
 
-  const goToPreviousMonth = () => {
-    const previousMonth = new Date(year, month - 1, 1);
+  const getDateKey = (date: Date) => {
+    const year = date.getFullYear();
 
-    const currentDate = new Date();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
 
-    const currentMonthStart = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      1,
-    );
+    const day = String(date.getDate()).padStart(2, "0");
 
-    if (previousMonth < currentMonthStart) {
-      return;
-    }
-
-    setCurrentMonth(previousMonth);
-    setSelectedDate(null);
+    return `${year}-${month}-${day}`;
   };
 
-  const goToNextMonth = () => {
-    setCurrentMonth(new Date(year, month + 1, 1));
-
-    setSelectedDate(null);
-  };
-
-  // --------------------------------------------------
-  // DATE AVAILABILITY
-  // --------------------------------------------------
-
-  const isDateAvailable = (date: Date) => {
-    const dateKey = getDateKey(date);
-
-    if (!availability[dateKey]) {
-      return true;
-    }
-
-    return availability[dateKey].available;
-  };
-
-  // --------------------------------------------------
-  // SELECT DATE
-  // --------------------------------------------------
-
-  const handleDateSelect = (day: number) => {
-    const date = new Date(year, month, day);
-
-    if (isPastDate(day)) {
-      return;
-    }
-
-    if (!isDateAvailable(date)) {
-      return;
-    }
-
-    setSelectedDate(date);
-
-    setSuccessMessage("");
-    setErrorMessage("");
-  };
-
-  // --------------------------------------------------
+  // ===================================================
   // CREATE BOOKING
-  // --------------------------------------------------
+  // ===================================================
 
   const handleBooking = async () => {
     setSuccessMessage("");
     setErrorMessage("");
 
+    // LOGIN CHECK
+
     if (!isAuthenticated || !user) {
       setErrorMessage("Please login before requesting a booking.");
+
       return;
     }
+
+    // DATE CHECK
 
     if (!selectedDate) {
       setErrorMessage("Please select a booking date.");
+
       return;
     }
+
+    // VENUE CHECK
 
     if (!venueId) {
       setErrorMessage("Please select a marriage lawn.");
+
       return;
     }
+
+    // PACKAGE CHECK
 
     if (!packageId) {
       setErrorMessage("Please select a package.");
+
       return;
     }
 
+    // GUEST CHECK
+
     if (guests <= 0) {
       setErrorMessage("Number of guests must be greater than 0.");
+
       return;
     }
 
@@ -379,14 +330,32 @@ const BookNow = () => {
         bookingDate: getDateKey(selectedDate),
         guests,
         specialRequests: requests,
+
+        // These can be used
+        // if your backend supports them
+        customerName,
+        customerMobile,
+        customerEmail,
+        address,
       });
 
       setSuccessMessage(
         response.data.message || "Booking request submitted successfully.",
       );
 
+      // RESET FORM
+
       setSelectedDate(null);
+
       setRequests("");
+
+      setAddress("");
+
+      setCustomerName("");
+
+      setCustomerMobile("");
+
+      setCustomerEmail("");
     } catch (error: any) {
       console.error("Booking API error:", error);
 
@@ -398,20 +367,18 @@ const BookNow = () => {
     }
   };
 
-  // --------------------------
-  // SELECTED DATE AVAILABILITY
-  // --------------------------
-
-  const selectedDateAvailability = selectedDate
-    ? availability[getDateKey(selectedDate)]
-    : null;
+  // =====================================================
+  // RENDER
+  // =====================================================
 
   return (
     <div className="min-h-screen bg-[#17120f] text-white">
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        {/* PAGE HEADING */}
+        {/* ==========================================
+            PAGE HEADING
+        ========================================== */}
 
         <div className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-semibold">
@@ -423,145 +390,44 @@ const BookNow = () => {
           </p>
         </div>
 
+        {/* ==========================================
+            MAIN GRID
+        ========================================== */}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* LEFT SIDE */}
+          {/* ========================================
+              LEFT SIDE
+          ======================================== */}
 
           <div className="lg:col-span-2 space-y-6">
-            {/* CALENDAR */}
+            {/* ======================================
+                CALENDAR + BOOKING DETAILS COMPONENT
+            ====================================== */}
+
+            <BookingCalendar
+              currentMonth={currentMonth}
+              selectedDate={selectedDate}
+              availability={availability}
+              loadingAvailability={loadingAvailability}
+              onMonthChange={(date: any) => {
+                setCurrentMonth(date);
+                setSelectedDate(null);
+              }}
+              onDateSelect={(date: any) => {
+                setSelectedDate(date);
+
+                setSuccessMessage("");
+
+                setErrorMessage("");
+              }}
+            />
+
+            {/* ======================================
+                BOOKING FORM
+            ====================================== */}
 
             <div className="bg-[#2b211c] border border-[#3a2f29] rounded-xl p-5">
-              <div className="flex items-center gap-2 mb-5">
-                <CalendarDays size={20} className="text-[#d8a849]" />
-
-                <h2 className="text-lg font-medium">Select Date</h2>
-              </div>
-
-              {/* MONTH HEADER */}
-
-              <div className="flex items-center justify-between mb-4">
-                <button
-                  type="button"
-                  onClick={goToPreviousMonth}
-                  className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-[#3a2e27] transition"
-                >
-                  <ChevronLeft size={18} />
-                </button>
-
-                <h3 className="text-base font-medium">
-                  {monthName} {year}
-                </h3>
-
-                <button
-                  type="button"
-                  onClick={goToNextMonth}
-                  className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-[#3a2e27] transition"
-                >
-                  <ChevronRight size={18} />
-                </button>
-              </div>
-
-              {/* WEEK NAMES */}
-
-              <div className="grid grid-cols-7 mb-2">
-                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(
-                  (day) => (
-                    <div
-                      key={day}
-                      className="text-center text-[11px] text-[#80736b] py-2"
-                    >
-                      {day}
-                    </div>
-                  ),
-                )}
-              </div>
-
-              {/* CALENDAR DAYS */}
-
-              <div className="grid grid-cols-7 gap-y-2">
-                {calendarDays.map((day, index) => {
-                  if (day === null) {
-                    return <div key={index} className="h-10" />;
-                  }
-
-                  const date = new Date(year, month, day);
-
-                  const dateKey = getDateKey(date);
-
-                  const past = isPastDate(day);
-
-                  const available = isDateAvailable(date);
-
-                  const isSelected =
-                    selectedDate?.toDateString() === date.toDateString();
-
-                  return (
-                    <div key={index} className="flex justify-center">
-                      <button
-                        type="button"
-                        disabled={past || !available}
-                        onClick={() => handleDateSelect(day)}
-                        className={` relative w-10 h-10 rounded-full text-sm transition flex items-center justify-center
-                            ${isSelected
-                            ? "bg-[#a94b3f] text-white"
-                            : past
-                              ? "text-[#514943] cursor-not-allowed"
-                              : !available
-                                ? "text-red-500/40 cursor-not-allowed"
-                                : "text-[#b8aaa1] hover:bg-[#3b3029] hover:text-white"
-                          }
-                          `}
-                      >
-                        {day}
-
-                        {!past && !available && (
-                          <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-red-500" />
-                        )}
-
-                        {!past && available && !isSelected && (
-                          <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-[#62a86c]" />
-                        )}
-
-                        {availability[dateKey] &&
-                          !availability[dateKey].available && <span />}
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* LOADING */}
-
-              {loadingAvailability && (
-                <div className="flex items-center justify-center gap-2 mt-4 text-xs text-[#9e9188]">
-                  <Loader2 size={13} className="animate-spin" />
-                  Checking availability...
-                </div>
-              )}
-
-              {/* LEGEND */}
-
-              <div className="flex flex-wrap gap-5 mt-6 text-xs text-[#8e8179]">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-[#62a86c]" />
-                  Available
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-red-500" />
-                  Booked
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-[#a94b3f]" />
-                  Selected
-                </div>
-              </div>
-            </div>
-
-            {/* BOOKING DETAILS */}
-
-            <div className="bg-[#2b211c] border border-[#3a2f29] rounded-xl p-5">
-              <h2 className="text-lg font-medium mb-5">Booking Details</h2>
+              <h2 className="text-lg font-medium mb-5">Event Information</h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {/* VENUE */}
@@ -577,6 +443,7 @@ const BookNow = () => {
                       const value = Number(e.target.value);
 
                       setVenueId(value);
+
                       setSelectedDate(null);
                     }}
                     disabled={loadingVenues}
@@ -718,7 +585,9 @@ const BookNow = () => {
                 </div>
               </div>
 
-              {/* CUSTOMER INFORMATION */}
+              {/* ====================================
+                  CUSTOMER INFORMATION
+              ==================================== */}
 
               <div className="mt-6 pt-6 border-t border-[#3a2f29]">
                 <h3 className="text-sm font-medium mb-4">
@@ -726,6 +595,8 @@ const BookNow = () => {
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* NAME */}
+
                   <div>
                     <label className="block text-xs text-[#a39790] mb-2">
                       Name
@@ -733,10 +604,14 @@ const BookNow = () => {
 
                     <input
                       type="text"
-                      // value={""}
-                      className="w-full bg-[#201813] border border-[#3d332c] rounded-lg px-3 py-3 text-sm text-[#a39790]"
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                      placeholder="Your name"
+                      className="w-full bg-[#201813] border border-[#3d332c] rounded-lg px-3 py-3 text-sm outline-none focus:border-[#d8a849] placeholder:text-[#625850]"
                     />
                   </div>
+
+                  {/* MOBILE */}
 
                   <div>
                     <label className="block text-xs text-[#a39790] mb-2">
@@ -744,11 +619,15 @@ const BookNow = () => {
                     </label>
 
                     <input
-                      type="number"
-                      // value={""}
-                      className="w-full bg-[#201813] border border-[#3d332c] rounded-lg px-3 py-3 text-sm text-[#a39790]"
+                      type="tel"
+                      value={customerMobile}
+                      onChange={(e) => setCustomerMobile(e.target.value)}
+                      placeholder="Mobile number"
+                      className="w-full bg-[#201813] border border-[#3d332c] rounded-lg px-3 py-3 text-sm outline-none focus:border-[#d8a849] placeholder:text-[#625850]"
                     />
                   </div>
+
+                  {/* EMAIL */}
 
                   <div>
                     <label className="block text-xs text-[#a39790] mb-2">
@@ -757,29 +636,36 @@ const BookNow = () => {
 
                     <input
                       type="email"
-                      // value={""}
-                      className="w-full bg-[#201813] border border-[#3d332c] rounded-lg px-3 py-3 text-sm text-[#a39790]"
+                      value={customerEmail}
+                      onChange={(e) => setCustomerEmail(e.target.value)}
+                      placeholder="Email address"
+                      className="w-full bg-[#201813] border border-[#3d332c] rounded-lg px-3 py-3 text-sm outline-none focus:border-[#d8a849] placeholder:text-[#625850]"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Address */}
+              {/* ====================================
+                  ADDRESS
+              ==================================== */}
 
               <div className="mt-6">
                 <label className="block text-xs text-[#a39790] mb-2">
-                  Enter Your complete address
+                  Enter Your Complete Address
                 </label>
 
                 <textarea
-                  rows={2}
-                  value={requests}
-                  onChange={(e) => setRequests(e.target.value)}
-                  placeholder="Decoration, catering, parking, special arrangements..."
+                  rows={3}
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="Enter your complete address..."
                   className="w-full bg-[#201813] border border-[#4b4039] rounded-lg px-3 py-3 text-sm outline-none focus:border-[#d8a849] resize-none placeholder:text-[#625850]"
                 />
               </div>
-              {/* SPECIAL REQUESTS */}
+
+              {/* ====================================
+                  SPECIAL REQUESTS
+              ==================================== */}
 
               <div className="mt-6">
                 <label className="block text-xs text-[#a39790] mb-2">
@@ -797,7 +683,9 @@ const BookNow = () => {
             </div>
           </div>
 
-          {/* RIGHT SIDE SUMMARY */}
+          {/* ========================================
+              RIGHT SIDE - SUMMARY
+          ======================================== */}
 
           <div>
             <div className="lg:sticky lg:top-24 bg-[#2b211c] border border-[#3a2f29] rounded-xl p-5">
@@ -809,7 +697,15 @@ const BookNow = () => {
                 <div>
                   <p className="text-xs text-[#81756d]">Selected Date</p>
 
-                  <p className="text-sm mt-1">{formatSelectedDate()}</p>
+                  <p className="text-sm mt-1">
+                    {selectedDate
+                      ? selectedDate.toLocaleDateString("en-IN", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })
+                      : "Select a date"}
+                  </p>
                 </div>
 
                 {/* VENUE */}
@@ -852,22 +748,25 @@ const BookNow = () => {
                 {/* AVAILABILITY */}
 
                 <div className="bg-[#22271f] rounded-lg p-3">
-                  {selectedDateAvailability?.available === false ? (
-                    <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-red-500" />
+                  {selectedDate ? (
+                    availability[getDateKey(selectedDate)]?.available ===
+                      false ? (
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-red-500" />
 
-                      <span className="text-xs text-red-400">
-                        Selected date is unavailable
-                      </span>
-                    </div>
-                  ) : selectedDate ? (
-                    <div className="flex items-center gap-2">
-                      <Check size={14} className="text-[#62a86c]" />
+                        <span className="text-xs text-red-400">
+                          Selected date is unavailable
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-[#62a86c]" />
 
-                      <span className="text-xs text-[#76ab7b]">
-                        This date is available
-                      </span>
-                    </div>
+                        <span className="text-xs text-[#76ab7b]">
+                          This date is available
+                        </span>
+                      </div>
+                    )
                   ) : (
                     <span className="text-xs text-[#8b7e76]">
                       Select a date to check availability
@@ -878,6 +777,8 @@ const BookNow = () => {
                 {/* PRICE */}
 
                 <div className="border-t border-[#3a2f29] pt-4 space-y-3">
+                  {/* BASE */}
+
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-[#968980]">Base package</span>
 
@@ -885,6 +786,8 @@ const BookNow = () => {
                       ₹{basePrice.toLocaleString("en-IN")}
                     </span>
                   </div>
+
+                  {/* EXTRA GUESTS */}
 
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-[#968980]">Extra guests</span>
@@ -894,6 +797,8 @@ const BookNow = () => {
                     </span>
                   </div>
 
+                  {/* SUBTOTAL */}
+
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-[#968980]">Subtotal</span>
 
@@ -901,6 +806,8 @@ const BookNow = () => {
                       ₹{subtotal.toLocaleString("en-IN")}
                     </span>
                   </div>
+
+                  {/* GST */}
 
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-[#968980]">GST (18%)</span>
@@ -912,6 +819,8 @@ const BookNow = () => {
                       })}
                     </span>
                   </div>
+
+                  {/* TOTAL */}
 
                   <div className="flex items-center justify-between pt-2">
                     <span className="text-sm font-medium">Total</span>
@@ -926,17 +835,23 @@ const BookNow = () => {
                 </div>
               </div>
 
+              {/* SUCCESS */}
+
               {successMessage && (
                 <div className="mt-5 bg-[#1f3224] border border-[#315d39] text-[#7bc182] rounded-lg p-3 text-xs">
                   {successMessage}
                 </div>
               )}
 
+              {/* ERROR */}
+
               {errorMessage && (
                 <div className="mt-5 bg-[#351f1f] border border-[#623333] text-red-400 rounded-lg p-3 text-xs">
                   {errorMessage}
                 </div>
               )}
+
+              {/* BOOKING BUTTON */}
 
               <button
                 type="button"
