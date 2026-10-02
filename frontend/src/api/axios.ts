@@ -3,10 +3,6 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from "axios";
 
-// ---------------------------------------------
-// Main API client
-// ---------------------------------------------
-
 const axiosInstance = axios.create({
   baseURL: "http://localhost:5000",
   withCredentials: true,
@@ -14,10 +10,6 @@ const axiosInstance = axios.create({
     "Content-Type": "application/json",
   },
 });
-
-// ---------------------------------------------
-// Separate refresh client
-// ---------------------------------------------
 
 const refreshClient = axios.create({
   baseURL: "http://localhost:5000",
@@ -31,9 +23,7 @@ const refreshClient = axios.create({
 axiosInstance.interceptors.request.use(
   (config) => {
     const token =
-      localStorage.getItem(
-        "accessToken"
-      );
+      localStorage.getItem("accessToken");
 
     if (token) {
       config.headers.Authorization =
@@ -42,8 +32,9 @@ axiosInstance.interceptors.request.use(
 
     return config;
   },
-  (error) =>
-    Promise.reject(error)
+  (error) => {
+    return Promise.reject(error);
+  }
 );
 
 // ---------------------------------------------
@@ -68,18 +59,21 @@ axiosInstance.interceptors.response.use(
     const status =
       error.response?.status;
 
-    const responseData =
+    const data =
       error.response?.data as
         | {
             code?: string;
+            message?: string;
           }
         | undefined;
 
-    // Only refresh when ACCESS TOKEN expired
+    // -----------------------------------------
+    // Access token expired
+    // -----------------------------------------
+
     if (
       status === 401 &&
-      responseData?.code ===
-        "TOKEN_EXPIRED" &&
+      data?.code === "TOKEN_EXPIRED" &&
       !originalRequest._retry
     ) {
       originalRequest._retry = true;
@@ -93,6 +87,12 @@ axiosInstance.interceptors.response.use(
         const newAccessToken =
           response.data.accessToken;
 
+        if (!newAccessToken) {
+          throw new Error(
+            "New access token not received"
+          );
+        }
+
         localStorage.setItem(
           "accessToken",
           newAccessToken
@@ -104,8 +104,12 @@ axiosInstance.interceptors.response.use(
         return axiosInstance(
           originalRequest
         );
-
       } catch (refreshError) {
+        console.error(
+          "Refresh token failed:",
+          refreshError
+        );
+
         localStorage.removeItem(
           "accessToken"
         );

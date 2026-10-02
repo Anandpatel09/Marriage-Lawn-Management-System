@@ -1,23 +1,78 @@
+// import jwt from "jsonwebtoken";
+
+// export const authenticate = (
+//     req,
+//     res,
+//     next
+// ) => {
+//     try {
+//         const authHeader =
+//             req.headers.authorization;
+
+//         if (
+//             !authHeader ||
+//             !authHeader.startsWith(
+//                 "Bearer "
+//             )
+//         ) {
+//             return res.status(401).json({
+//                 message:
+//                     "Authentication required",
+//                 code: "AUTH_REQUIRED",
+//             });
+//         }
+
+//         const token =
+//             authHeader.split(" ")[1];
+
+//         const decoded = jwt.verify(
+//             token,
+//             process.env.JWT_ACCESS_SECRET
+//         );
+
+//         req.user = decoded;
+
+//         next();
+
+//     } catch (error) {
+//         console.error(
+//             "Authentication error:",
+//             error
+//         );
+
+//         if (
+//             error.name ===
+//             "TokenExpiredError"
+//         ) {
+//             return res.status(401).json({
+//                 message:
+//                     "Access token expired",
+//                 code: "TOKEN_EXPIRED",
+//             });
+//         }
+
+//         return res.status(401).json({
+//             message:
+//                 "Invalid access token",
+//             code: "INVALID_TOKEN",
+//         });
+//     }
+// };
+
+
 import jwt from "jsonwebtoken";
 
-export const authenticate = (
-    req,
-    res,
-    next
-) => {
+export const authenticate = (req, res, next) => {
     try {
         const authHeader =
             req.headers.authorization;
 
         if (
             !authHeader ||
-            !authHeader.startsWith(
-                "Bearer "
-            )
+            !authHeader.startsWith("Bearer ")
         ) {
             return res.status(401).json({
-                message:
-                    "Authentication required",
+                message: "Authentication required",
                 code: "AUTH_REQUIRED",
             });
         }
@@ -33,7 +88,6 @@ export const authenticate = (
         req.user = decoded;
 
         next();
-
     } catch (error) {
         console.error(
             "Authentication error:",
@@ -41,19 +95,16 @@ export const authenticate = (
         );
 
         if (
-            error.name ===
-            "TokenExpiredError"
+            error.name === "TokenExpiredError"
         ) {
             return res.status(401).json({
-                message:
-                    "Access token expired",
+                message: "Access token expired",
                 code: "TOKEN_EXPIRED",
             });
         }
 
         return res.status(401).json({
-            message:
-                "Invalid access token",
+            message: "Invalid access token",
             code: "INVALID_TOKEN",
         });
     }

@@ -497,11 +497,12 @@ export const getMe = async (req, res) => {
 
 //Referesh token  Controller
 
+
 export const refreshToken = async (req, res) => {
     try {
-        // ----------------------------------------
+        // ---------------------------------------
         // 1. Get refresh token from cookie
-        // ----------------------------------------
+        // ---------------------------------------
 
         const refreshToken =
             req.cookies.refreshToken;
@@ -510,12 +511,13 @@ export const refreshToken = async (req, res) => {
             return res.status(401).json({
                 message:
                     "Refresh token not found",
+                code: "REFRESH_TOKEN_MISSING",
             });
         }
 
-        // ----------------------------------------
-        // 2. Verify refresh token JWT
-        // ----------------------------------------
+        // ---------------------------------------
+        // 2. Verify refresh token
+        // ---------------------------------------
 
         let decoded;
 
@@ -525,35 +527,36 @@ export const refreshToken = async (req, res) => {
                 process.env.JWT_REFRESH_SECRET
             );
         } catch (error) {
+            console.error(
+                "Refresh token verification error:",
+                error
+            );
+
+            res.clearCookie("refreshToken");
+
             if (
                 error.name ===
                 "TokenExpiredError"
             ) {
-                res.clearCookie(
-                    "refreshToken"
-                );
-
                 return res.status(401).json({
                     message:
                         "Refresh token expired",
-                    code: "REFRESH_TOKEN_EXPIRED",
+                    code:
+                        "REFRESH_TOKEN_EXPIRED",
                 });
             }
-
-            res.clearCookie(
-                "refreshToken"
-            );
 
             return res.status(401).json({
                 message:
                     "Invalid refresh token",
-                code: "INVALID_REFRESH_TOKEN",
+                code:
+                    "INVALID_REFRESH_TOKEN",
             });
         }
 
-        // ----------------------------------------
+        // ---------------------------------------
         // 3. Hash refresh token
-        // ----------------------------------------
+        // ---------------------------------------
 
         const refreshTokenHash =
             crypto
@@ -561,9 +564,9 @@ export const refreshToken = async (req, res) => {
                 .update(refreshToken)
                 .digest("hex");
 
-        // ----------------------------------------
-        // 4. Check session in database
-        // ----------------------------------------
+        // ---------------------------------------
+        // 4. Check session
+        // ---------------------------------------
 
         const [sessions] =
             await pool.execute(
@@ -582,9 +585,7 @@ export const refreshToken = async (req, res) => {
             );
 
         if (sessions.length === 0) {
-            res.clearCookie(
-                "refreshToken"
-            );
+            res.clearCookie("refreshToken");
 
             return res.status(401).json({
                 message:
@@ -595,30 +596,29 @@ export const refreshToken = async (req, res) => {
 
         const session = sessions[0];
 
-        // ----------------------------------------
-        // 5. Make sure token user matches session
-        // ----------------------------------------
+        // ---------------------------------------
+        // 5. Compare user IDs
+        // ---------------------------------------
 
         if (
             Number(decoded.userId) !==
             Number(session.user_id)
         ) {
-            res.clearCookie(
-                "refreshToken"
-            );
+            res.clearCookie("refreshToken");
 
             return res.status(401).json({
                 message:
                     "Invalid refresh token",
-                code: "INVALID_REFRESH_TOKEN",
+                code:
+                    "INVALID_REFRESH_TOKEN",
             });
         }
 
-        // ----------------------------------------
-        // 6. Create NEW access token
-        // ----------------------------------------
+        // ---------------------------------------
+        // 6. Create new access token
+        // ---------------------------------------
 
-        const newAccessToken = jwt.sign(
+        const accessToken = jwt.sign(
             {
                 userId: session.user_id,
                 role: session.role,
@@ -629,19 +629,19 @@ export const refreshToken = async (req, res) => {
             }
         );
 
-        // ----------------------------------------
+        // ---------------------------------------
         // 7. Send new access token
-        // ----------------------------------------
+        // ---------------------------------------
 
         return res.status(200).json({
             message:
                 "Access token refreshed",
-            accessToken: newAccessToken,
+            accessToken,
         });
 
     } catch (error) {
         console.error(
-            "Refresh token error:",
+            "Refresh access token error:",
             error
         );
 
@@ -651,3 +651,161 @@ export const refreshToken = async (req, res) => {
         });
     }
 };
+
+
+
+// export const refreshToken = async (req, res) => {
+//     try {
+//         // ----------------------------------------
+//         // 1. Get refresh token from cookie
+//         // ----------------------------------------
+
+//         const refreshToken =
+//             req.cookies.refreshToken;
+
+//         if (!refreshToken) {
+//             return res.status(401).json({
+//                 message:
+//                     "Refresh token not found",
+//             });
+//         }
+
+//         // ----------------------------------------
+//         // 2. Verify refresh token JWT
+//         // ----------------------------------------
+
+//         let decoded;
+
+//         try {
+//             decoded = jwt.verify(
+//                 refreshToken,
+//                 process.env.JWT_REFRESH_SECRET
+//             );
+//         } catch (error) {
+//             if (
+//                 error.name ===
+//                 "TokenExpiredError"
+//             ) {
+//                 res.clearCookie(
+//                     "refreshToken"
+//                 );
+
+//                 return res.status(401).json({
+//                     message:
+//                         "Refresh token expired",
+//                     code: "REFRESH_TOKEN_EXPIRED",
+//                 });
+//             }
+
+//             res.clearCookie(
+//                 "refreshToken"
+//             );
+
+//             return res.status(401).json({
+//                 message:
+//                     "Invalid refresh token",
+//                 code: "INVALID_REFRESH_TOKEN",
+//             });
+//         }
+
+//         // ----------------------------------------
+//         // 3. Hash refresh token
+//         // ----------------------------------------
+
+//         const refreshTokenHash =
+//             crypto
+//                 .createHash("sha256")
+//                 .update(refreshToken)
+//                 .digest("hex");
+
+//         // ----------------------------------------
+//         // 4. Check session in database
+//         // ----------------------------------------
+
+//         const [sessions] =
+//             await pool.execute(
+//                 `SELECT
+//                     s.id,
+//                     s.user_id,
+//                     s.expires_at,
+//                     u.role
+//                  FROM sessions s
+//                  INNER JOIN users u
+//                     ON u.id = s.user_id
+//                  WHERE s.refresh_token_hash = ?
+//                    AND s.expires_at > NOW()
+//                  LIMIT 1`,
+//                 [refreshTokenHash]
+//             );
+
+//         if (sessions.length === 0) {
+//             res.clearCookie(
+//                 "refreshToken"
+//             );
+
+//             return res.status(401).json({
+//                 message:
+//                     "Refresh session is invalid or expired",
+//                 code: "INVALID_SESSION",
+//             });
+//         }
+
+//         const session = sessions[0];
+
+//         // ----------------------------------------
+//         // 5. Make sure token user matches session
+//         // ----------------------------------------
+
+//         if (
+//             Number(decoded.userId) !==
+//             Number(session.user_id)
+//         ) {
+//             res.clearCookie(
+//                 "refreshToken"
+//             );
+
+//             return res.status(401).json({
+//                 message:
+//                     "Invalid refresh token",
+//                 code: "INVALID_REFRESH_TOKEN",
+//             });
+//         }
+
+//         // ----------------------------------------
+//         // 6. Create NEW access token
+//         // ----------------------------------------
+
+//         const newAccessToken = jwt.sign(
+//             {
+//                 userId: session.user_id,
+//                 role: session.role,
+//             },
+//             process.env.JWT_ACCESS_SECRET,
+//             {
+//                 expiresIn: "15m",
+//             }
+//         );
+
+//         // ----------------------------------------
+//         // 7. Send new access token
+//         // ----------------------------------------
+
+//         return res.status(200).json({
+//             message:
+//                 "Access token refreshed",
+//             accessToken: newAccessToken,
+//         });
+
+//     } catch (error) {
+//         console.error(
+//             "Refresh token error:",
+//             error
+//         );
+
+//         return res.status(500).json({
+//             message:
+//                 "Failed to refresh access token",
+//         });
+//     }
+// };
+

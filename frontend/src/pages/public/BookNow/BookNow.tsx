@@ -578,11 +578,12 @@ const BookNow = () => {
 
                   <div>
                     <label className="block text-xs text-[#a39790] mb-2">
-                      Mobile
+                      Mobile <span className="text-red-600">*</span>
                     </label>
 
                     <input
                       type="tel"
+                      required
                       value={customerMobile}
                       onChange={(e) => setCustomerMobile(e.target.value)}
                       placeholder="Mobile number"
@@ -594,7 +595,7 @@ const BookNow = () => {
 
                   <div>
                     <label className="block text-xs text-[#a39790] mb-2">
-                      Email
+                      Email 
                     </label>
 
                     <input
@@ -614,7 +615,7 @@ const BookNow = () => {
 
               <div className="mt-6">
                 <label className="block text-xs text-[#a39790] mb-2">
-                  Enter Your Complete Address
+                  Enter Your Complete Address  <span className="text-red-600">*</span>
                 </label>
 
                 <textarea
@@ -638,6 +639,7 @@ const BookNow = () => {
                 <textarea
                   rows={4}
                   value={requests}
+                  required
                   onChange={(e) => setRequests(e.target.value)}
                   placeholder="Decoration, catering, parking, special arrangements..."
                   className="w-full bg-[#201813] border border-[#4b4039] rounded-lg px-3 py-3 text-sm outline-none focus:border-[#d8a849] resize-none placeholder:text-[#625850]"
