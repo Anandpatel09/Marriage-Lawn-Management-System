@@ -1,9 +1,11 @@
 
 import { CalendarDays } from "lucide-react";
 import Navbar from '../../components/comman/Navbar'
+import { useNavigate } from "react-router-dom";
 
 
 const Home = () => {
+  const navigate = useNavigate();
   return (
     <div>
     
@@ -32,7 +34,7 @@ const Home = () => {
 
             {/* Top Label */}
             <p className="text-[#d8a849] text-xs sm:text-sm tracking-[0.35em] font-medium mb-8">
-              SINCE 2009 · RAJASTHAN
+              SINCE 2015 · SULTANPUR ,UTTAR PRADESH
             </p>
 
             {/* Heading */}
@@ -53,7 +55,9 @@ const Home = () => {
             {/* Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 mt-10">
 
-              <button className="flex items-center justify-center gap-2 px-8 py-4 bg-[#d8a849] hover:bg-[#c99a3d] text-black font-medium rounded-lg transition">
+              <button 
+               onClick={() => navigate('/booknow')}
+              className="flex items-center justify-center gap-2 px-8 py-4 bg-[#d8a849] hover:bg-[#c99a3d] text-black font-medium rounded-lg transition">
                 <CalendarDays size={18} />
                 Check availability
               </button>

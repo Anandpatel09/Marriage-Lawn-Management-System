@@ -1,8 +1,10 @@
-import React from "react";
+
 import Navbar from "../../components/comman/Navbar";
 import Footer from "../../components/comman/Footer";
+import { useNavigate } from "react-router-dom";
 
 const About = () => {
+  const navigate = useNavigate();
   return (
     <div className="min-h-dvh flex flex-col bg-[#17120f] text-white">
 
@@ -153,7 +155,9 @@ const About = () => {
           {/* ================= CTA ================= */}
           <div className="flex justify-center mt-9">
 
-            <button className="px-6 py-2.5 bg-[#d8a849] hover:bg-[#c99a3d] text-black text-xs sm:text-sm font-medium rounded-md transition">
+            <button 
+             onClick={() => navigate('/booknow')}
+            className="px-6 py-2.5 bg-[#d8a849] hover:bg-[#c99a3d] text-black text-xs sm:text-sm font-medium rounded-md transition">
               Plan your wedding with us
             </button>
 

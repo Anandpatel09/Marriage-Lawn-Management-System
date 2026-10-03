@@ -1,170 +1,166 @@
 import pool from "../config/db.js";
 
 export const createBooking = async (req, res) => {
-  let connection;
+    let connection;
 
-  try {
-    // -------------------------------------------------
-    // 1. USER FROM AUTH TOKEN
-    // -------------------------------------------------
+    try {
+        // ============================================
+        // 1. AUTHENTICATED USER
+        // ============================================
 
-    const userId = req.user.userId;
+        const userId = req.user.userId;
 
-    // -------------------------------------------------
-    // 2. REQUEST DATA
-    // -------------------------------------------------
+        // ============================================
+        // 2. GET ALL DATA FROM FRONTEND PAYLOAD
+        // ============================================
 
-    const {
-      venueId,
-      packageId,
-      occasion,
-      bookingDate,
-      guests,
-      customerAddress,
-      specialRequests,
-    } = req.body;
+        const {
+            venueId,
+            packageId,
+            occasion,
+            bookingDate,
+            guests,
 
-    // -------------------------------------------------
-    // 3. BASIC VALIDATION
-    // -------------------------------------------------
+            customerName,
+            customerMobile,
+            customerEmail,
+            customerAddress,
 
-    if (!venueId || !packageId || !occasion || !bookingDate || !guests) {
-      return res.status(400).json({
-        message:
-          "Venue, package, occasion, booking date and guests are required.",
-      });
-    }
+            specialRequests,
+        } = req.body;
 
-    if (Number(guests) <= 0) {
-      return res.status(400).json({
-        message: "Number of guests must be greater than 0.",
-      });
-    }
+        // ============================================
+        // 3. VALIDATION
+        // ============================================
 
-    // -------------------------------------------------
-    // 4. CONNECTION
-    // -------------------------------------------------
+        if (
+            !venueId ||
+            !packageId ||
+            !occasion ||
+            !bookingDate ||
+            guests === undefined ||
+            guests === null
+        ) {
+            return res.status(400).json({
+                message:
+                    "Venue, package, occasion, booking date and guests are required.",
+            });
+        }
 
-    connection = await pool.getConnection();
+        if (!customerName?.trim()) {
+            return res.status(400).json({
+                message:
+                    "Customer name is required.",
+            });
+        }
 
-    await connection.beginTransaction();
+        if (!customerMobile?.trim()) {
+            return res.status(400).json({
+                message:
+                    "Customer mobile is required.",
+            });
+        }
 
-    // -------------------------------------------------
-    // 5. GET CUSTOMER
-    // -------------------------------------------------
+        if (!customerEmail?.trim()) {
+            return res.status(400).json({
+                message:
+                    "Customer email is required.",
+            });
+        }
 
-    const [users] = await connection.execute(
-      `
-            SELECT
-                id,
-                first_name,
-                last_name,
-                email,
-                mobile,
-                city
-            FROM users
-            WHERE id = ?
-            LIMIT 1
-            `,
-      [userId],
-    );
+        if (!customerAddress?.trim()) {
+            return res.status(400).json({
+                message:
+                    "Customer address is required.",
+            });
+        }
 
-    if (users.length === 0) {
-      await connection.rollback();
+        if (Number(guests) <= 0) {
+            return res.status(400).json({
+                message:
+                    "Number of guests must be greater than 0.",
+            });
+        }
 
-      return res.status(404).json({
-        message: "User not found.",
-      });
-    }
+        // ============================================
+        // 4. DATABASE CONNECTION
+        // ============================================
 
-    const user = users[0];
+        connection =
+            await pool.getConnection();
 
-    const customerName = `${user.first_name} ${user.last_name}`.trim();
+        await connection.beginTransaction();
 
-    const customerEmail = user.email;
+        // ============================================
+        // 5. CHECK VENUE EXISTS
+        // ============================================
 
-    const customerMobile = user.mobile;
-
-    const address = customerAddress || user.city || null;
-
-    // -------------------------------------------------
-    // 6. GET VENUE
-    // -------------------------------------------------
-
-    const [venues] = await connection.execute(
-      `
-            SELECT
-                id,
-                name,
-                capacity
-            FROM venues
-            WHERE id = ?
-            LIMIT 1
-            `,
-      [venueId],
-    );
-
-    if (venues.length === 0) {
-      await connection.rollback();
-
-      return res.status(404).json({
-        message: "Marriage lawn not found.",
-      });
-    }
-
-    const venue = venues[0];
-
-    // -------------------------------------------------
-    // 7. CHECK VENUE CAPACITY
-    // -------------------------------------------------
-
-    if (Number(guests) > Number(venue.capacity)) {
-      await connection.rollback();
-
-      return res.status(400).json({
-        message: `Maximum capacity of ${venue.name} is ${venue.capacity} guests.`,
-      });
-    }
-
-    // -------------------------------------------------
-    // 8. GET PACKAGE
-    // -------------------------------------------------
-
-    const [packages] = await connection.execute(
-      `
-            SELECT
-                id,
-                name,
-                base_price,
-                included_guests,
-                extra_guest_price
-            FROM packages
-            WHERE id = ?
-              AND active = TRUE
-            LIMIT 1
-            `,
-      [packageId],
-    );
-
-    if (packages.length === 0) {
-      await connection.rollback();
-
-      return res.status(404).json({
-        message: "Selected package not found.",
-      });
-    }
-
-    const selectedPackage = packages[0];
-
-    // -------------------------------------------------
-    // 9. CHECK AVAILABILITY
-    // -------------------------------------------------
-
-    const [existingBookings] = await connection.execute(
-      `
+        const [venues] =
+            await connection.execute(
+                `
                 SELECT
                     id,
-                    status
+                    name
+                FROM venues
+                WHERE id = ?
+                LIMIT 1
+                `,
+                [venueId]
+            );
+
+        if (venues.length === 0) {
+            await connection.rollback();
+
+            return res.status(404).json({
+                message:
+                    "Marriage lawn not found.",
+            });
+        }
+
+        const venue = venues[0];
+
+        // ============================================
+        // 6. GET PACKAGE
+        // ============================================
+
+        const [packages] =
+            await connection.execute(
+                `
+                SELECT
+                    id,
+                    name,
+                    base_price,
+                    included_guests,
+                    extra_guest_price
+                FROM packages
+                WHERE id = ?
+                  AND active = TRUE
+                LIMIT 1
+                `,
+                [packageId]
+            );
+
+        if (packages.length === 0) {
+            await connection.rollback();
+
+            return res.status(404).json({
+                message:
+                    "Selected package not found.",
+            });
+        }
+
+        const selectedPackage =
+            packages[0];
+
+        // ============================================
+        // 7. CHECK DATE AVAILABILITY
+        // ============================================
+
+        const [existingBookings] =
+            await connection.execute(
+                `
+                SELECT
+                    id
                 FROM bookings
                 WHERE venue_id = ?
                   AND booking_date = ?
@@ -176,45 +172,82 @@ export const createBooking = async (req, res) => {
                 LIMIT 1
                 FOR UPDATE
                 `,
-      [venueId, bookingDate],
-    );
+                [
+                    venueId,
+                    bookingDate,
+                ]
+            );
 
-    if (existingBookings.length > 0) {
-      await connection.rollback();
+        if (
+            existingBookings.length > 0
+        ) {
+            await connection.rollback();
 
-      return res.status(409).json({
-        message: "This marriage lawn is already booked for the selected date.",
-      });
-    }
+            return res.status(409).json({
+                message:
+                    "This marriage lawn is already booked for the selected date.",
+            });
+        }
 
-    // -------------------------------------------------
-    // 10. SERVER-SIDE PRICE CALCULATION
-    // -------------------------------------------------
+        // ============================================
+        // 8. SERVER-SIDE PRICE CALCULATION
+        // ============================================
 
-    const baseAmount = Number(selectedPackage.base_price);
+        const baseAmount =
+            Number(
+                selectedPackage.base_price
+            );
 
-    const includedGuests = Number(selectedPackage.included_guests);
+        const includedGuests =
+            Number(
+                selectedPackage.included_guests
+            );
 
-    const extraGuestPrice = Number(selectedPackage.extra_guest_price);
+        const extraGuestPrice =
+            Number(
+                selectedPackage.extra_guest_price
+            );
 
-    const guestCount = Number(guests);
+        const guestCount =
+            Number(guests);
 
-    const extraGuestCount = Math.max(0, guestCount - includedGuests);
+        const extraGuestCount =
+            Math.max(
+                0,
+                guestCount -
+                    includedGuests
+            );
 
-    const extraGuestAmount = extraGuestCount * extraGuestPrice;
+        const extraGuestAmount =
+            extraGuestCount *
+            extraGuestPrice;
 
-    const subtotal = baseAmount + extraGuestAmount;
+        const subtotal =
+            baseAmount +
+            extraGuestAmount;
 
-    const gstAmount = Number((subtotal * 0.18).toFixed(2));
+        const gstAmount =
+            Number(
+                (
+                    subtotal * 0.18
+                ).toFixed(2)
+            );
 
-    const totalAmount = Number((subtotal + gstAmount).toFixed(2));
+        const totalAmount =
+            Number(
+                (
+                    subtotal +
+                    gstAmount
+                ).toFixed(2)
+            );
 
-    // -------------------------------------------------
-    // 11. INSERT BOOKING
-    // -------------------------------------------------
+        // ============================================
+        // 9. INSERT EVERYTHING
+        // ============================================
 
-    const [result] = await connection.execute(
-      `
+        const [result] =
+            await connection.execute(
+                `
                 INSERT INTO bookings (
                     user_id,
                     venue_id,
@@ -223,126 +256,179 @@ export const createBooking = async (req, res) => {
                     booking_date,
                     slot,
                     guests,
+
                     customer_name,
                     customer_mobile,
                     customer_email,
                     customer_address,
+
                     special_requests,
+
                     base_amount,
                     extra_guest_count,
                     extra_guest_amount,
                     subtotal,
                     gst_amount,
                     total_amount,
+
                     status
                 )
-                VALUES (?,?,?,?,?,'full-day',?,?,?,?,?,?,?,?,?,?,?,?,'pending')
+                VALUES (
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+                    'full-day',
+                    ?,
+
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+
+                    ?,
+
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+
+                    'pending'
+                )
                 `,
-      [
-        userId,
-        venueId,
-        packageId,
-        occasion,
-        bookingDate,
-        guestCount,
-        customerName,
-        customerMobile,
-        customerEmail,
-        address,
-        specialRequests || null,
-        baseAmount,
-        extraGuestCount,
-        extraGuestAmount,
-        subtotal,
-        gstAmount,
-        totalAmount,
-      ],
-    );
+                [
+                    userId,
+                    venueId,
+                    packageId,
+                    occasion,
+                    bookingDate,
+                    guestCount,
 
-    // -------------------------------------------------
-    // 12. COMMIT
-    // -------------------------------------------------
+                    customerName.trim(),
+                    customerMobile.trim(),
+                    customerEmail.trim(),
+                    customerAddress.trim(),
 
-    await connection.commit();
+                    specialRequests?.trim() ||
+                        null,
 
-    // -------------------------------------------------
-    // 13. RESPONSE
-    // -------------------------------------------------
+                    baseAmount,
+                    extraGuestCount,
+                    extraGuestAmount,
+                    subtotal,
+                    gstAmount,
+                    totalAmount,
+                ]
+            );
 
-    return res.status(201).json({
-      message: "Booking request submitted successfully.",
+        // ============================================
+        // 10. COMMIT
+        // ============================================
 
-      booking: {
-        id: result.insertId,
+        await connection.commit();
 
-        userId,
+        // ============================================
+        // 11. RESPONSE
+        // ============================================
 
-        venueId,
+        return res.status(201).json({
+            message:
+                "Booking request submitted successfully.",
 
-        packageId,
+            booking: {
+                id:
+                    result.insertId,
 
-        venueName: venue.name,
+                userId,
 
-        packageName: selectedPackage.name,
+                venueId,
 
-        occasion,
+                packageId,
 
-        bookingDate,
+                venueName:
+                    venue.name,
 
-        guests: guestCount,
+                packageName:
+                    selectedPackage.name,
 
-        customerName,
+                occasion,
 
-        customerMobile,
+                bookingDate,
 
-        customerEmail,
+                guests:
+                    guestCount,
 
-        customerAddress: address,
+                customerName:
+                    customerName.trim(),
 
-        specialRequests: specialRequests || null,
+                customerMobile:
+                    customerMobile.trim(),
 
-        baseAmount,
+                customerEmail:
+                    customerEmail.trim(),
 
-        extraGuestCount,
+                customerAddress:
+                    customerAddress.trim(),
 
-        extraGuestAmount,
+                specialRequests:
+                    specialRequests?.trim() ||
+                    null,
 
-        subtotal,
+                baseAmount,
 
-        gstAmount,
+                extraGuestCount,
 
-        totalAmount,
+                extraGuestAmount,
 
-        status: "pending",
-      },
-    });
-  } catch (error) {
-    if (connection) {
-      try {
-        await connection.rollback();
-      } catch (rollbackError) {
-        console.error("Rollback error:", rollbackError);
-      }
+                subtotal,
+
+                gstAmount,
+
+                totalAmount,
+
+                status:
+                    "pending",
+            },
+        });
+
+    } catch (error) {
+        if (connection) {
+            try {
+                await connection.rollback();
+            } catch (rollbackError) {
+                console.error(
+                    "Rollback error:",
+                    rollbackError
+                );
+            }
+        }
+
+        console.error(
+            "Create booking error:",
+            error
+        );
+
+        if (
+            error.code ===
+            "ER_DUP_ENTRY"
+        ) {
+            return res.status(409).json({
+                message:
+                    "This marriage lawn is already booked for the selected date.",
+            });
+        }
+
+        return res.status(500).json({
+            message:
+                "Failed to create booking.",
+        });
+
+    } finally {
+        if (connection) {
+            connection.release();
+        }
     }
-
-    console.error("Create booking error:", error);
-
-    // ---------------------------------------------
-    // DUPLICATE BOOKING
-    // ---------------------------------------------
-
-    if (error.code === "ER_DUP_ENTRY") {
-      return res.status(409).json({
-        message: "This marriage lawn is already booked for the selected date.",
-      });
-    }
-
-    return res.status(500).json({
-      message: "Failed to create booking.",
-    });
-  } finally {
-    if (connection) {
-      connection.release();
-    }
-  }
 };
