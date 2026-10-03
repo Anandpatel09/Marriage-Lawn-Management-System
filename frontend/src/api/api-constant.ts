@@ -24,7 +24,7 @@ export const API = {
 
   BOOKING: {
     CREATE: "/api/bookings",
-    MY_BOOKINGS: "/api/bookings/my-bookings",
+    MY_BOOKINGS: "/api/bookings/my-bookings", 
   },
 
   CONTACT: {
