@@ -2,6 +2,7 @@
 import { CalendarDays } from "lucide-react";
 import Navbar from '../../components/comman/Navbar'
 import { useNavigate } from "react-router-dom";
+import Bookings from "./Booking-Public";
 
 
 const Home = () => {
@@ -135,7 +136,7 @@ const Home = () => {
           </div>
         </section>
       
-
+        <Bookings/>
       </div>
     </div>
   )
