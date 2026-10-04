@@ -42,26 +42,7 @@ const UserProfile = () => {
               </p>
             </div>
 
-            <button
-              onClick={() => navigate("/")}
-              className="
-                                hidden
-                                sm:flex
-                                items-center
-                                gap-2
-                                px-4
-                                py-2.5
-                                rounded-lg
-                                border
-                                border-[#493d35]
-                                text-[#d0c6bf]
-                                hover:bg-[#2a211c]
-                                hover:text-white
-                                transition
-                            "
-            >
-              Back to Home
-            </button>
+          
           </div>
         </div>
       </header>
