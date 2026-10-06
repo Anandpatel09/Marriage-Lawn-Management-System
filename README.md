@@ -5,7 +5,6 @@ A full-stack **Marriage Lawn Management System** built to manage marriage lawn e
 The project is divided into a **React + TypeScript frontend** and a **Node.js + Express + MySQL backend**...
 
 ---
----
 
 ## 📌 Project Overview
 
