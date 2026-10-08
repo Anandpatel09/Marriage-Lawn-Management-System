@@ -12,20 +12,14 @@ import {
 const router =
     express.Router();
 
-// ==========================================
 // CREATE BOOKING
-// ==========================================
-
 router.post(
     "/",
     authenticate,
     createBooking
 );
 
-// ==========================================
-// GET MY BOOKINGS
-// ==========================================
-
+// MY BOOKINGS
 router.get(
     "/my-bookings",
     authenticate,

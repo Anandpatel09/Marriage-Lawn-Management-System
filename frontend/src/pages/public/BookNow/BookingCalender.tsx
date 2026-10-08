@@ -1,9 +1,4 @@
-import {
-  CalendarDays,
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
-} from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useMemo } from "react";
 
 interface AvailabilityMap {
@@ -51,11 +46,7 @@ const BookingCalendar = ({
     return Array.from({ length: 12 }, (_, index) => {
       return {
         value: index,
-        label: new Date(
-          2000,
-          index,
-          1
-        ).toLocaleString("en-IN", {
+        label: new Date(2000, index, 1).toLocaleString("en-IN", {
           month: "long",
         }),
       };
@@ -67,42 +58,28 @@ const BookingCalendar = ({
   // =====================================================
 
   const yearOptions = useMemo(() => {
-    return Array.from(
-      { length: 11 },
-      (_, index) => currentYear + index
-    );
+    return Array.from({ length: 11 }, (_, index) => currentYear + index);
   }, [currentYear]);
 
   // =====================================================
   // MONTH NAME
   // =====================================================
 
-  const monthName = currentMonth.toLocaleString(
-    "en-IN",
-    {
-      month: "long",
-    }
-  );
+  const monthName = currentMonth.toLocaleString("en-IN", {
+    month: "long",
+  });
 
   // =====================================================
   // DAYS IN MONTH
   // =====================================================
 
-  const daysInMonth = new Date(
-    year,
-    month + 1,
-    0
-  ).getDate();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
 
   // =====================================================
   // FIRST DAY OF MONTH
   // =====================================================
 
-  const firstDayOfMonth = new Date(
-    year,
-    month,
-    1
-  ).getDay();
+  const firstDayOfMonth = new Date(year, month, 1).getDay();
 
   // =====================================================
   // CALENDAR DAYS
@@ -116,7 +93,7 @@ const BookingCalendar = ({
         {
           length: daysInMonth,
         },
-        (_, index) => index + 1
+        (_, index) => index + 1,
       ),
     ];
   }, [firstDayOfMonth, daysInMonth]);
@@ -126,16 +103,11 @@ const BookingCalendar = ({
   // =====================================================
 
   const getDateKey = (date: Date) => {
-    const dateYear =
-      date.getFullYear();
+    const dateYear = date.getFullYear();
 
-    const dateMonth = String(
-      date.getMonth() + 1
-    ).padStart(2, "0");
+    const dateMonth = String(date.getMonth() + 1).padStart(2, "0");
 
-    const dateDay = String(
-      date.getDate()
-    ).padStart(2, "0");
+    const dateDay = String(date.getDate()).padStart(2, "0");
 
     return `${dateYear}-${dateMonth}-${dateDay}`;
   };
@@ -145,20 +117,11 @@ const BookingCalendar = ({
   // =====================================================
 
   const isPastDate = (day: number) => {
-    const date = new Date(
-      year,
-      month,
-      day
-    );
+    const date = new Date(year, month, day);
 
     const currentDate = new Date();
 
-    currentDate.setHours(
-      0,
-      0,
-      0,
-      0
-    );
+    currentDate.setHours(0, 0, 0, 0);
 
     return date < currentDate;
   };
@@ -167,58 +130,36 @@ const BookingCalendar = ({
   // CHECK DATE AVAILABLE
   // =====================================================
 
-  const isDateAvailable = (
-    date: Date
-  ) => {
-    const dateKey =
-      getDateKey(date);
+  const isDateAvailable = (date: Date) => {
+    const dateKey = getDateKey(date);
 
     if (!availability[dateKey]) {
       return true;
     }
 
-    return availability[
-      dateKey
-    ].available;
+    return availability[dateKey].available;
   };
 
   // =====================================================
   // CHECK MONTH IS CURRENT/PREVIOUS
   // =====================================================
 
-  const isCurrentMonth =
-    year === currentYear &&
-    month === currentMonthIndex;
+  const isCurrentMonth = year === currentYear && month === currentMonthIndex;
 
   // =====================================================
   // PREVIOUS MONTH
   // =====================================================
 
   const goToPreviousMonth = () => {
-    const previousMonth =
-      new Date(
-        year,
-        month - 1,
-        1
-      );
+    const previousMonth = new Date(year, month - 1, 1);
 
-    const currentMonthStart =
-      new Date(
-        currentYear,
-        currentMonthIndex,
-        1
-      );
+    const currentMonthStart = new Date(currentYear, currentMonthIndex, 1);
 
-    if (
-      previousMonth <
-      currentMonthStart
-    ) {
+    if (previousMonth < currentMonthStart) {
       return;
     }
 
-    onMonthChange(
-      previousMonth
-    );
+    onMonthChange(previousMonth);
   };
 
   // =====================================================
@@ -226,83 +167,46 @@ const BookingCalendar = ({
   // =====================================================
 
   const goToNextMonth = () => {
-    onMonthChange(
-      new Date(
-        year,
-        month + 1,
-        1
-      )
-    );
+    onMonthChange(new Date(year, month + 1, 1));
   };
 
   // =====================================================
   // SELECT MONTH
   // =====================================================
 
-  const handleMonthChange = (
-    selectedMonth: number
-  ) => {
-    let newMonth =
-      selectedMonth;
+  const handleMonthChange = (selectedMonth: number) => {
+    let newMonth = selectedMonth;
 
     // Prevent selecting a month in the past
-    if (
-      year === currentYear &&
-      newMonth < currentMonthIndex
-    ) {
-      newMonth =
-        currentMonthIndex;
+    if (year === currentYear && newMonth < currentMonthIndex) {
+      newMonth = currentMonthIndex;
     }
 
-    onMonthChange(
-      new Date(
-        year,
-        newMonth,
-        1
-      )
-    );
+    onMonthChange(new Date(year, newMonth, 1));
   };
 
   // =====================================================
   // SELECT YEAR
   // =====================================================
 
-  const handleYearChange = (
-    selectedYear: number
-  ) => {
+  const handleYearChange = (selectedYear: number) => {
     let newMonth = month;
 
     // If selecting current year,
     // don't allow previous months
-    if (
-      selectedYear === currentYear &&
-      newMonth < currentMonthIndex
-    ) {
-      newMonth =
-        currentMonthIndex;
+    if (selectedYear === currentYear && newMonth < currentMonthIndex) {
+      newMonth = currentMonthIndex;
     }
 
-    onMonthChange(
-      new Date(
-        selectedYear,
-        newMonth,
-        1
-      )
-    );
+    onMonthChange(new Date(selectedYear, newMonth, 1));
   };
 
   // =====================================================
   // SELECT DATE
   // =====================================================
 
-  const handleDateSelect = (
-    day: number
-  ) => {
-    const date = new Date(
-      year,
-      month,
-      day
-    );
+  const handleDateSelect = (day: number) => {
+    const date = new Date(year, month, day);
 
     if (isPastDate(day)) {
       return;
@@ -321,26 +225,17 @@ const BookingCalendar = ({
 
   return (
     <div className="space-y-6">
-
       {/* ================================================
           CALENDAR
       ================================================ */}
 
       <div className="bg-[#2b211c] border border-[#3a2f29] rounded-xl p-5">
-
         {/* TITLE */}
 
         <div className="flex items-center gap-2 mb-5">
+          <CalendarDays size={20} className="text-[#d8a849]" />
 
-          <CalendarDays
-            size={20}
-            className="text-[#d8a849]"
-          />
-
-          <h2 className="text-lg font-medium">
-            Select Date
-          </h2>
-
+          <h2 className="text-lg font-medium">Select Date</h2>
         </div>
 
         {/* ==============================================
@@ -348,7 +243,6 @@ const BookingCalendar = ({
         ============================================== */}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-
           {/* MONTH SELECT */}
 
           <div>
@@ -362,32 +256,23 @@ const BookingCalendar = ({
             <select
               id="calendar-month"
               value={month}
-              onChange={(e) =>
-                handleMonthChange(
-                  Number(e.target.value)
-                )
-              }
+              onChange={(e) => handleMonthChange(Number(e.target.value))}
               className="w-full bg-[#201813] border border-[#4b4039] rounded-lg px-3 py-2.5 text-xs text-white outline-none focus:border-[#d8a849] cursor-pointer"
             >
-              {monthOptions.map(
-                (item) => {
-                  const disabled =
-                    year ===
-                    currentYear &&
-                    item.value <
-                    currentMonthIndex;
+              {monthOptions.map((item) => {
+                const disabled =
+                  year === currentYear && item.value < currentMonthIndex;
 
-                  return (
-                    <option
-                      key={item.value}
-                      value={item.value}
-                      disabled={disabled}
-                    >
-                      {item.label}
-                    </option>
-                  );
-                }
-              )}
+                return (
+                  <option
+                    key={item.value}
+                    value={item.value}
+                    disabled={disabled}
+                  >
+                    {item.label}
+                  </option>
+                );
+              })}
             </select>
           </div>
 
@@ -404,26 +289,16 @@ const BookingCalendar = ({
             <select
               id="calendar-year"
               value={year}
-              onChange={(e) =>
-                handleYearChange(
-                  Number(e.target.value)
-                )
-              }
+              onChange={(e) => handleYearChange(Number(e.target.value))}
               className="w-full bg-[#201813] border border-[#4b4039] rounded-lg px-3 py-2.5 text-xs text-white outline-none focus:border-[#d8a849] cursor-pointer"
             >
-              {yearOptions.map(
-                (item) => (
-                  <option
-                    key={item}
-                    value={item}
-                  >
-                    {item}
-                  </option>
-                )
-              )}
+              {yearOptions.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
             </select>
           </div>
-
         </div>
 
         {/* ==============================================
@@ -431,7 +306,6 @@ const BookingCalendar = ({
         ============================================== */}
 
         <div className="flex items-center justify-between mb-4">
-
           <button
             type="button"
             onClick={goToPreviousMonth}
@@ -454,7 +328,6 @@ const BookingCalendar = ({
           >
             <ChevronRight size={18} />
           </button>
-
         </div>
 
         {/* ==============================================
@@ -462,16 +335,7 @@ const BookingCalendar = ({
         ============================================== */}
 
         <div className="grid grid-cols-7 mb-2">
-
-          {[
-            "Sun",
-            "Mon",
-            "Tue",
-            "Wed",
-            "Thu",
-            "Fri",
-            "Sat",
-          ].map((day) => (
+          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
             <div
               key={day}
               className="text-center text-[10px] sm:text-[11px] text-[#80736b] py-2"
@@ -479,7 +343,6 @@ const BookingCalendar = ({
               {day}
             </div>
           ))}
-
         </div>
 
         {/* ==============================================
@@ -487,64 +350,32 @@ const BookingCalendar = ({
         ============================================== */}
 
         <div className="grid grid-cols-7 gap-y-2">
+          {calendarDays.map((day, index) => {
+            if (day === null) {
+              return <div key={`empty-${index}`} className="h-10" />;
+            }
 
-          {calendarDays.map(
-            (day, index) => {
+            const date = new Date(year, month, day);
 
-              if (day === null) {
-                return (
-                  <div
-                    key={`empty-${index}`}
-                    className="h-10"
-                  />
-                );
-              }
+            const dateKey = getDateKey(date);
 
-              const date =
-                new Date(
-                  year,
-                  month,
-                  day
-                );
+            const past = isPastDate(day);
 
-              const dateKey =
-                getDateKey(date);
+            const available = isDateAvailable(date);
 
-              const past =
-                isPastDate(day);
+            const isSelected =
+              selectedDate?.toDateString() === date.toDateString();
 
-              const available =
-                isDateAvailable(
-                  date
-                );
+            const bookingInfo = availability[dateKey];
 
-              const isSelected =
-                selectedDate?.toDateString() ===
-                date.toDateString();
-
-              const bookingInfo =
-                availability[
-                dateKey
-                ];
-
-              return (
-                <div
-                  key={dateKey}
-                  className="flex justify-center"
-                >
-                  <button
-                    type="button"
-                    disabled={
-                      past ||
-                      !available
-                    }
-                    onClick={() =>
-                      handleDateSelect(
-                        day
-                      )
-                    }
-                    aria-label={`${monthName} ${day}, ${year}`}
-                    className={`
+            return (
+              <div key={dateKey} className="flex justify-center">
+                <button
+                  type="button"
+                  disabled={past || !available}
+                  onClick={() => handleDateSelect(day)}
+                  aria-label={`${monthName} ${day}, ${year}`}
+                  className={`
                       relative
                       w-10
                       h-10
@@ -555,51 +386,45 @@ const BookingCalendar = ({
                       flex
                       items-center
                       justify-center
-                      ${isSelected
-                        ? "bg-[#a94b3f] text-white shadow-md"
-                        : past
-                          ? "text-[#514943] cursor-not-allowed"
-                          : !available
-                            ? "text-red-500/40 cursor-not-allowed"
-                            : "text-[#b8aaa1] hover:bg-[#3b3029] hover:text-white"
+                      ${
+                        isSelected
+                          ? "bg-[#a94b3f] text-white shadow-md"
+                          : past
+                            ? "text-[#514943] cursor-not-allowed"
+                            : !available
+                              ? "text-red-500/40 cursor-not-allowed"
+                              : "text-[#b8aaa1] hover:bg-[#3b3029] hover:text-white"
                       }
                     `}
-                  >
-                    {day}
+                >
+                  {day}
 
-                    {/* BOOKED */}
+                  {/* BOOKED */}
 
-                    {!past &&
-                      !available && (
-                        <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-red-500" />
-                      )}
+                  {!past && !available && (
+                    <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-red-500" />
+                  )}
 
-                    {/* AVAILABLE */}
+                  {/* AVAILABLE */}
 
-                    {!past &&
-                      available &&
-                      !isSelected && (
-                        <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-[#62a86c]" />
-                      )}
+                  {!past && available && !isSelected && (
+                    <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-[#62a86c]" />
+                  )}
 
-                    {bookingInfo &&
-                      !bookingInfo.available && (
-                        <span
-                          className="absolute inset-0 rounded-full"
-                          title={
-                            bookingInfo.status
-                              ? `Status: ${bookingInfo.status}`
-                              : "Booked"
-                          }
-                        />
-                      )}
-
-                  </button>
-                </div>
-              );
-            }
-          )}
-
+                  {bookingInfo && !bookingInfo.available && (
+                    <span
+                      className="absolute inset-0 rounded-full"
+                      title={
+                        bookingInfo.status
+                          ? `Status: ${bookingInfo.status}`
+                          : "Booked"
+                      }
+                    />
+                  )}
+                </button>
+              </div>
+            );
+          })}
         </div>
 
         {/* ==============================================
@@ -608,14 +433,8 @@ const BookingCalendar = ({
 
         {loadingAvailability && (
           <div className="flex items-center justify-center gap-2 mt-4 text-xs text-[#9e9188]">
-
-            <Loader2
-              size={13}
-              className="animate-spin"
-            />
-
+            <Loader2 size={13} className="animate-spin" />
             Checking availability...
-
           </div>
         )}
 
@@ -624,7 +443,6 @@ const BookingCalendar = ({
         ============================================== */}
 
         <div className="flex flex-wrap gap-5 mt-6 text-[10px] sm:text-xs text-[#8e8179]">
-
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#62a86c]" />
             Available
@@ -639,9 +457,7 @@ const BookingCalendar = ({
             <span className="w-2 h-2 rounded-full bg-[#a94b3f]" />
             Selected
           </div>
-
         </div>
-
       </div>
 
       {/* ================================================
@@ -649,64 +465,39 @@ const BookingCalendar = ({
       ================================================ */}
 
       <div className="bg-[#2b211c] border border-[#3a2f29] rounded-xl p-5">
-
-        <h2 className="text-lg font-medium mb-5">
-          Booking Details
-        </h2>
+        <h2 className="text-lg font-medium mb-5">Booking Details</h2>
 
         {selectedDate ? (
           <div className="bg-[#201813] rounded-lg p-4">
-
             <div className="flex items-center justify-between gap-4">
-
               <div>
-                <p className="text-xs text-[#81756d]">
-                  Selected Date
-                </p>
+                <p className="text-xs text-[#81756d]">Selected Date</p>
 
                 <p className="text-sm mt-1 text-white">
-                  {selectedDate.toLocaleDateString(
-                    "en-IN",
-                    {
-                      weekday:
-                        "long",
-                      day: "2-digit",
-                      month: "long",
-                      year: "numeric",
-                    }
-                  )}
+                  {selectedDate.toLocaleDateString("en-IN", {
+                    weekday: "long",
+                    day: "2-digit",
+                    month: "long",
+                    year: "numeric",
+                  })}
                 </p>
               </div>
 
               <div className="text-right">
+                <p className="text-xs text-[#81756d]">Status</p>
 
-                <p className="text-xs text-[#81756d]">
-                  Status
-                </p>
-
-                <p className="text-sm mt-1 text-[#76ab7b]">
-                  Available
-                </p>
-
+                <p className="text-sm mt-1 text-[#76ab7b]">Available</p>
               </div>
-
             </div>
-
           </div>
         ) : (
           <div className="bg-[#201813] rounded-lg p-4">
-
             <p className="text-xs text-[#8b7e76]">
-              Select a date from the
-              calendar to continue your
-              booking.
+              Select a date from the calendar to continue your booking.
             </p>
-
           </div>
         )}
-
       </div>
-
     </div>
   );
 };
