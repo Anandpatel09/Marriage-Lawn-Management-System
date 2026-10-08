@@ -25,6 +25,7 @@ import AdminProfile from "../pages/admin/adminNavbarData/AdminProfile";
 import UserProfile from "../pages/customer/UserProfile";
 import Availability from "../pages/admin/Availability";
 import Bookings from "../pages/admin/Booking/Bookings";
+import OurLawns from "../pages/public/OurLawns";
 
 const AppRoutes = () => {
     return (
@@ -120,6 +121,10 @@ const AppRoutes = () => {
             <Route
                 path="/admin/bookings"
                 element={<Bookings />}
+            />
+            <Route
+                path="/lawns"
+                element={<OurLawns />}
             />
         </Routes>
     );

@@ -138,7 +138,7 @@ const About = () => {
             <div className="flex gap-3">
               {/* Instagram */}
               <a
-                href="https://www.instagram.com/YourInstagram/"
+                href="https://www.instagram.com/anand09patel/"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Follow us on Instagram"
