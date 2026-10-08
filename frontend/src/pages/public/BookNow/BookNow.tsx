@@ -1,8 +1,5 @@
 import { Loader2 } from "lucide-react";
-import {
-  useEffect,
-  useState,
-} from "react";
+import { useEffect, useState } from "react";
 
 import Navbar from "../../../components/comman/Navbar";
 import Footer from "../../../components/comman/Footer";
@@ -38,11 +35,7 @@ interface Package {
 interface AvailabilityItem {
   booking_date: string;
   slot: "full-day";
-  status:
-  | "pending"
-  | "confirmed"
-  | "cancelled"
-  | "completed";
+  status: "pending" | "confirmed" | "cancelled" | "completed";
 }
 
 interface AvailabilityMap {
@@ -57,10 +50,7 @@ interface AvailabilityMap {
 // =====================================================
 
 const BookNow = () => {
-  const {
-    user,
-    isAuthenticated,
-  } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   // ===================================================
   // DATE
@@ -68,143 +58,71 @@ const BookNow = () => {
 
   const today = new Date();
 
-  const [
-    currentMonth,
-    setCurrentMonth,
-  ] = useState(
-    new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      1
-    )
+  const [currentMonth, setCurrentMonth] = useState(
+    new Date(today.getFullYear(), today.getMonth(), 1),
   );
 
-  const [
-    selectedDate,
-    setSelectedDate,
-  ] = useState<Date | null>(
-    null
-  );
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   // ===================================================
   // VENUES
   // ===================================================
 
-  const [
-    venues,
-    setVenues,
-  ] = useState<Venue[]>([]);
+  const [venues, setVenues] = useState<Venue[]>([]);
 
-  const [
-    loadingVenues,
-    setLoadingVenues,
-  ] = useState(false);
+  const [loadingVenues, setLoadingVenues] = useState(false);
 
-  const [
-    venueId,
-    setVenueId,
-  ] = useState<number | null>(
-    null
-  );
+  const [venueId, setVenueId] = useState<number | null>(null);
 
   // ===================================================
   // PACKAGES
   // ===================================================
 
-  const [
-    packages,
-    setPackages,
-  ] = useState<Package[]>([]);
+  const [packages, setPackages] = useState<Package[]>([]);
 
-  const [
-    loadingPackages,
-    setLoadingPackages,
-  ] = useState(false);
+  const [loadingPackages, setLoadingPackages] = useState(false);
 
-  const [
-    packageId,
-    setPackageId,
-  ] = useState<number | null>(
-    null
-  );
+  const [packageId, setPackageId] = useState<number | null>(null);
 
   // ===================================================
   // BOOKING DETAILS
   // ===================================================
 
-  const [
-    occasion,
-    setOccasion,
-  ] = useState("Wedding");
+  const [occasion, setOccasion] = useState("Wedding");
 
-  const [
-    guests,
-    setGuests,
-  ] = useState(300);
+  const [guests, setGuests] = useState(300);
 
-  const [
-    requests,
-    setRequests,
-  ] = useState("");
+  const [requests, setRequests] = useState("");
 
-  const [
-    address,
-    setAddress,
-  ] = useState("");
+  const [address, setAddress] = useState("");
 
   // ===================================================
   // CUSTOMER INFORMATION
   // ===================================================
 
-  const [
-    customerName,
-    setCustomerName,
-  ] = useState("");
+  const [customerName, setCustomerName] = useState("");
 
-  const [
-    customerMobile,
-    setCustomerMobile,
-  ] = useState("");
+  const [customerMobile, setCustomerMobile] = useState("");
 
-  const [
-    customerEmail,
-    setCustomerEmail,
-  ] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
 
   // ===================================================
   // AVAILABILITY
   // ===================================================
 
-  const [
-    availability,
-    setAvailability,
-  ] = useState<AvailabilityMap>(
-    {}
-  );
+  const [availability, setAvailability] = useState<AvailabilityMap>({});
 
-  const [
-    loadingAvailability,
-    setLoadingAvailability,
-  ] = useState(false);
+  const [loadingAvailability, setLoadingAvailability] = useState(false);
 
   // ===================================================
   // BOOKING STATE
   // ===================================================
 
-  const [
-    bookingLoading,
-    setBookingLoading,
-  ] = useState(false);
+  const [bookingLoading, setBookingLoading] = useState(false);
 
-  const [
-    successMessage,
-    setSuccessMessage,
-  ] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
-  const [
-    errorMessage,
-    setErrorMessage,
-  ] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   // ===================================================
   // FETCH VENUES
@@ -214,38 +132,21 @@ const BookNow = () => {
     try {
       setLoadingVenues(true);
 
-      const response =
-        await axiosInstance.get(
-          API.VENUE.GET_ALL
-        );
+      const response = await axiosInstance.get(API.VENUE.GET_ALL);
 
-      const venueData =
-        response.data.venues || [];
+      const venueData = response.data.venues || [];
 
-      setVenues(
-        venueData
-      );
+      setVenues(venueData);
 
-      if (
-        venueData.length > 0
-      ) {
-        setVenueId(
-          venueData[0].id
-        );
+      if (venueData.length > 0) {
+        setVenueId(venueData[0].id);
       }
     } catch (error) {
-      console.error(
-        "Venue API error:",
-        error
-      );
+      console.error("Venue API error:", error);
 
-      setErrorMessage(
-        "Failed to load marriage lawns."
-      );
+      setErrorMessage("Failed to load marriage lawns.");
     } finally {
-      setLoadingVenues(
-        false
-      );
+      setLoadingVenues(false);
     }
   };
 
@@ -253,120 +154,70 @@ const BookNow = () => {
   // FETCH PACKAGES
   // ===================================================
 
-  const fetchPackages =
-    async () => {
-      try {
-        setLoadingPackages(
-          true
-        );
+  const fetchPackages = async () => {
+    try {
+      setLoadingPackages(true);
 
-        const response =
-          await axiosInstance.get(
-            API.PACKAGE.GET_ALL
-          );
+      const response = await axiosInstance.get(API.PACKAGE.GET_ALL);
 
-        const packageData =
-          response.data
-            .packages || [];
+      const packageData = response.data.packages || [];
 
-        setPackages(
-          packageData
-        );
+      setPackages(packageData);
 
-        if (
-          packageData.length > 0
-        ) {
-          setPackageId(
-            packageData[0].id
-          );
-        }
-      } catch (error) {
-        console.error(
-          "Package API error:",
-          error
-        );
-
-        setErrorMessage(
-          "Failed to load packages."
-        );
-      } finally {
-        setLoadingPackages(
-          false
-        );
+      if (packageData.length > 0) {
+        setPackageId(packageData[0].id);
       }
-    };
+    } catch (error) {
+      console.error("Package API error:", error);
+
+      setErrorMessage("Failed to load packages.");
+    } finally {
+      setLoadingPackages(false);
+    }
+  };
 
   // ===================================================
   // FETCH AVAILABILITY
   // ===================================================
 
-  const fetchAvailability =
-    async () => {
-      if (!venueId) {
-        setAvailability(
-          {}
-        );
+  const fetchAvailability = async () => {
+    if (!venueId) {
+      setAvailability({});
 
-        return;
-      }
+      return;
+    }
 
-      try {
-        setLoadingAvailability(
-          true
-        );
+    try {
+      setLoadingAvailability(true);
 
-        const response =
-          await axiosInstance.get(
-            API.AVAILABILITY.GET,
-            {
-              params: {
-                venueId,
-                month:
-                  currentMonth.getMonth() +
-                  1,
-                year:
-                  currentMonth.getFullYear(),
-              },
-            }
-          );
+      const response = await axiosInstance.get(API.AVAILABILITY.GET, {
+        params: {
+          venueId,
+          month: currentMonth.getMonth() + 1,
+          year: currentMonth.getFullYear(),
+        },
+      });
 
-        const bookings: AvailabilityItem[] =
-          response.data.bookings ||
-          [];
+      const bookings: AvailabilityItem[] = response.data.bookings || [];
 
-        const map: AvailabilityMap =
-          {};
+      const map: AvailabilityMap = {};
 
-        bookings.forEach(
-          (booking) => {
-            map[
-              booking.booking_date
-            ] = {
-              available: false,
-              status:
-                booking.status,
-            };
-          }
-        );
+      bookings.forEach((booking) => {
+        map[booking.booking_date] = {
+          available: false,
+          status: booking.status,
+        };
+      });
 
-        setAvailability(
-          map
-        );
-      } catch (error) {
-        console.error(
-          "Availability API error:",
-          error
-        );
+      setAvailability(map);
+    } catch (error) {
+      console.error("Availability API error:", error);
 
-        setAvailability(
-          {}
-        );
-      } finally {
-        setLoadingAvailability(
-          false
-        );
-      }
-    };
+      setAvailability({});
+    } finally {
+      setLoadingAvailability(false);
+    }
+  };
 
   // ===================================================
   // INITIAL API CALLS
@@ -384,20 +235,13 @@ const BookNow = () => {
 
   useEffect(() => {
     fetchAvailability();
-  }, [
-    currentMonth,
-    venueId,
-  ]);
+  }, [currentMonth, venueId]);
 
   // ===================================================
   // SELECTED PACKAGE
   // ===================================================
 
-  const selectedPackage =
-    packages.find(
-      (pkg) =>
-        pkg.id === packageId
-    );
+  const selectedPackage = packages.find((pkg) => pkg.id === packageId);
 
   // ===================================================
   // PRICE CALCULATION
@@ -407,83 +251,43 @@ const BookNow = () => {
   // 125000.00022500
   // ===================================================
 
-  const basePrice = Number(
-    selectedPackage?.base_price ??
-    0
-  );
+  const basePrice = Number(selectedPackage?.base_price ?? 0);
 
-  const includedGuests =
-    Number(
-      selectedPackage?.included_guests ??
-      0
-    );
+  const includedGuests = Number(selectedPackage?.included_guests ?? 0);
 
-  const extraGuestPrice =
-    Number(
-      selectedPackage?.extra_guest_price ??
-      0
-    );
+  const extraGuestPrice = Number(selectedPackage?.extra_guest_price ?? 0);
 
-  const extraGuests =
-    Math.max(
-      0,
-      Number(guests) -
-      includedGuests
-    );
+  const extraGuests = Math.max(0, Number(guests) - includedGuests);
 
-  const extraGuestAmount =
-    extraGuests *
-    extraGuestPrice;
+  const extraGuestAmount = extraGuests * extraGuestPrice;
 
-  const subtotal =
-    basePrice +
-    extraGuestAmount;
+  const subtotal = basePrice + extraGuestAmount;
 
-  const gst = Number(
-    (subtotal * 0.18).toFixed(2)
-  );
+  const gst = Number((subtotal * 0.18).toFixed(2));
 
-  const total = Number(
-    (
-      subtotal + gst
-    ).toFixed(2)
-  );
+  const total = Number((subtotal + gst).toFixed(2));
 
   // ===================================================
   // CURRENCY FORMAT
   // ===================================================
 
-  const formatCurrency = (
-    amount: number
-  ) => {
-    return `₹${Number(
-      amount
-    ).toLocaleString(
-      "en-IN",
-      {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }
-    )}`;
+  const formatCurrency = (amount: number) => {
+    return `₹${Number(amount).toLocaleString("en-IN", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
   };
 
   // ===================================================
   // DATE FORMAT
   // ===================================================
 
-  const getDateKey = (
-    date: Date
-  ) => {
-    const year =
-      date.getFullYear();
+  const getDateKey = (date: Date) => {
+    const year = date.getFullYear();
 
-    const month = String(
-      date.getMonth() + 1
-    ).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
 
-    const day = String(
-      date.getDate()
-    ).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
 
     return `${year}-${month}-${day}`;
   };
@@ -705,160 +509,117 @@ const BookNow = () => {
   //   };
 
   const handleBooking = async () => {
-  try {
-    setBookingLoading(true);
+    try {
+      setBookingLoading(true);
 
-    setErrorMessage("");
-    setSuccessMessage("");
+      setErrorMessage("");
+      setSuccessMessage("");
 
-    if (!isAuthenticated) {
+      if (!isAuthenticated) {
+        setErrorMessage("Please login before booking.");
+        return;
+      }
+
+      if (!selectedDate) {
+        setErrorMessage("Please select a date.");
+        return;
+      }
+
+      if (!venueId) {
+        setErrorMessage("Please select a marriage lawn.");
+        return;
+      }
+
+      if (!packageId) {
+        setErrorMessage("Please select a package.");
+        return;
+      }
+
+      if (!occasion.trim()) {
+        setErrorMessage("Please select an occasion.");
+        return;
+      }
+
+      if (Number(guests) <= 0) {
+        setErrorMessage("Please enter a valid number of guests.");
+        return;
+      }
+
+      if (!customerName.trim()) {
+        setErrorMessage("Please enter customer name.");
+        return;
+      }
+
+      if (!customerMobile.trim()) {
+        setErrorMessage("Please enter customer mobile number.");
+        return;
+      }
+
+      if (!customerEmail.trim()) {
+        setErrorMessage("Please enter customer email.");
+        return;
+      }
+
+      if (!address.trim()) {
+        setErrorMessage("Please enter complete address.");
+        return;
+      }
+
+      const bookingDate = getDateKey(selectedDate);
+
+      const payload = {
+        // Event information
+        venueId,
+        packageId,
+        occasion,
+        bookingDate,
+        guests: Number(guests),
+
+        // Customer information
+        customerName: customerName.trim(),
+
+        customerMobile: customerMobile.trim(),
+
+        customerEmail: customerEmail.trim(),
+
+        customerAddress: address.trim(),
+
+        // Optional
+        specialRequests: requests.trim() || null,
+      };
+
+      console.log("BOOKING PAYLOAD:", payload);
+
+      const response = await axiosInstance.post(API.BOOKING.CREATE, payload);
+
+      console.log("Booking response:", response.data);
+
+      setSuccessMessage(
+        response.data.message || "Booking request submitted successfully!",
+      );
+
+      // Refresh calendar
+      await fetchAvailability();
+
+      // Reset date
+      setSelectedDate(null);
+
+      // Reset customer fields
+      setCustomerName("");
+      setCustomerMobile("");
+      setCustomerEmail("");
+      setAddress("");
+      setRequests("");
+    } catch (error: any) {
+      console.error("Booking error:", error);
+
       setErrorMessage(
-        "Please login before booking."
+        error?.response?.data?.message || "Failed to create booking.",
       );
-      return;
+    } finally {
+      setBookingLoading(false);
     }
-
-    if (!selectedDate) {
-      setErrorMessage(
-        "Please select a date."
-      );
-      return;
-    }
-
-    if (!venueId) {
-      setErrorMessage(
-        "Please select a marriage lawn."
-      );
-      return;
-    }
-
-    if (!packageId) {
-      setErrorMessage(
-        "Please select a package."
-      );
-      return;
-    }
-
-    if (!occasion.trim()) {
-      setErrorMessage(
-        "Please select an occasion."
-      );
-      return;
-    }
-
-    if (Number(guests) <= 0) {
-      setErrorMessage(
-        "Please enter a valid number of guests."
-      );
-      return;
-    }
-
-    if (!customerName.trim()) {
-      setErrorMessage(
-        "Please enter customer name."
-      );
-      return;
-    }
-
-    if (!customerMobile.trim()) {
-      setErrorMessage(
-        "Please enter customer mobile number."
-      );
-      return;
-    }
-
-    if (!customerEmail.trim()) {
-      setErrorMessage(
-        "Please enter customer email."
-      );
-      return;
-    }
-
-    if (!address.trim()) {
-      setErrorMessage(
-        "Please enter complete address."
-      );
-      return;
-    }
-
-    const bookingDate =
-      getDateKey(selectedDate);
-
-    const payload = {
-      // Event information
-      venueId,
-      packageId,
-      occasion,
-      bookingDate,
-      guests: Number(guests),
-
-      // Customer information
-      customerName:
-        customerName.trim(),
-
-      customerMobile:
-        customerMobile.trim(),
-
-      customerEmail:
-        customerEmail.trim(),
-
-      customerAddress:
-        address.trim(),
-
-      // Optional
-      specialRequests:
-        requests.trim() || null,
-    };
-
-    console.log(
-      "BOOKING PAYLOAD:",
-      payload
-    );
-
-    const response =
-      await axiosInstance.post(
-        API.BOOKING.CREATE,
-        payload
-      );
-
-    console.log(
-      "Booking response:",
-      response.data
-    );
-
-    setSuccessMessage(
-      response.data.message ||
-        "Booking request submitted successfully!"
-    );
-
-    // Refresh calendar
-    await fetchAvailability();
-
-    // Reset date
-    setSelectedDate(null);
-
-    // Reset customer fields
-    setCustomerName("");
-    setCustomerMobile("");
-    setCustomerEmail("");
-    setAddress("");
-    setRequests("");
-
-  } catch (error: any) {
-    console.error(
-      "Booking error:",
-      error
-    );
-
-    setErrorMessage(
-      error?.response?.data?.message ||
-        "Failed to create booking."
-    );
-
-  } finally {
-    setBookingLoading(false);
-  }
-};
+  };
 
   // =====================================================
   // RENDER
@@ -866,26 +627,21 @@ const BookNow = () => {
 
   return (
     <div className="min-h-screen bg-[#17120f] text-white">
-
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-
         {/* ==========================================
             PAGE HEADING
         ========================================== */}
 
         <div className="mb-8">
-
           <h1 className="text-3xl sm:text-4xl font-semibold">
             Book Your Special Day
           </h1>
 
           <p className="text-[#9e9188] mt-2 text-sm">
-            Select your preferred
-            date, lawn and package.
+            Select your preferred date, lawn and package.
           </p>
-
         </div>
 
         {/* ==========================================
@@ -893,63 +649,35 @@ const BookNow = () => {
         ========================================== */}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
           {/* ========================================
               LEFT SIDE
           ======================================== */}
 
           <div className="lg:col-span-2 space-y-6">
-
             {/* ======================================
                 CALENDAR
             ====================================== */}
 
             <BookingCalendar
-              currentMonth={
-                currentMonth
-              }
-              selectedDate={
-                selectedDate
-              }
-              availability={
-                availability
-              }
-              loadingAvailability={
-                loadingAvailability
-              }
-              onMonthChange={(
-                date: Date
-              ) => {
-                setCurrentMonth(
-                  date
-                );
+              currentMonth={currentMonth}
+              selectedDate={selectedDate}
+              availability={availability}
+              loadingAvailability={loadingAvailability}
+              onMonthChange={(date: Date) => {
+                setCurrentMonth(date);
 
-                setSelectedDate(
-                  null
-                );
+                setSelectedDate(null);
 
-                setSuccessMessage(
-                  ""
-                );
+                setSuccessMessage("");
 
-                setErrorMessage(
-                  ""
-                );
+                setErrorMessage("");
               }}
-              onDateSelect={(
-                date: Date
-              ) => {
-                setSelectedDate(
-                  date
-                );
+              onDateSelect={(date: Date) => {
+                setSelectedDate(date);
 
-                setSuccessMessage(
-                  ""
-                );
+                setSuccessMessage("");
 
-                setErrorMessage(
-                  ""
-                );
+                setErrorMessage("");
               }}
             />
 
@@ -958,311 +686,158 @@ const BookNow = () => {
             ====================================== */}
 
             <div className="bg-[#2b211c] border border-[#3a2f29] rounded-xl p-5">
-
-              <h2 className="text-lg font-medium mb-5">
-                Event Information
-              </h2>
+              <h2 className="text-lg font-medium mb-5">Event Information</h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-
                 {/* VENUE */}
 
                 <div>
-
                   <label className="block text-xs text-[#a39790] mb-2">
                     Marriage Lawn
                   </label>
 
                   <select
-                    value={
-                      venueId ?? ""
-                    }
-                    onChange={(
-                      e
-                    ) => {
-                      const value =
-                        Number(
-                          e.target
-                            .value
-                        );
+                    value={venueId ?? ""}
+                    onChange={(e) => {
+                      const value = Number(e.target.value);
 
-                      setVenueId(
-                        value
-                      );
+                      setVenueId(value);
 
-                      setSelectedDate(
-                        null
-                      );
+                      setSelectedDate(null);
 
-                      setSuccessMessage(
-                        ""
-                      );
+                      setSuccessMessage("");
 
-                      setErrorMessage(
-                        ""
-                      );
+                      setErrorMessage("");
                     }}
-                    disabled={
-                      loadingVenues
-                    }
+                    disabled={loadingVenues}
                     className="w-full bg-[#201813] border border-[#4b4039] rounded-lg px-3 py-3 text-sm outline-none focus:border-[#d8a849]"
                   >
-
                     {loadingVenues ? (
-                      <option>
-                        Loading lawns...
-                      </option>
-                    ) : venues.length ===
-                      0 ? (
-                      <option value="">
-                        No lawns available
-                      </option>
+                      <option>Loading lawns...</option>
+                    ) : venues.length === 0 ? (
+                      <option value="">No lawns available</option>
                     ) : (
-                      venues.map(
-                        (
-                          venue
-                        ) => (
-                          <option
-                            key={
-                              venue.id
-                            }
-                            value={
-                              venue.id
-                            }
-                          >
-                            {
-                              venue.name
-                            }
-                          </option>
-                        )
-                      )
+                      venues.map((venue) => (
+                        <option key={venue.id} value={venue.id}>
+                          {venue.name}
+                        </option>
+                      ))
                     )}
-
                   </select>
-
                 </div>
 
                 {/* PACKAGE */}
 
                 <div>
-
                   <label className="block text-xs text-[#a39790] mb-2">
                     Package
                   </label>
 
                   <select
-                    value={
-                      packageId ?? ""
-                    }
-                    onChange={(
-                      e
-                    ) =>
-                      setPackageId(
-                        Number(
-                          e.target
-                            .value
-                        )
-                      )
-                    }
-                    disabled={
-                      loadingPackages
-                    }
+                    value={packageId ?? ""}
+                    onChange={(e) => setPackageId(Number(e.target.value))}
+                    disabled={loadingPackages}
                     className="w-full bg-[#201813] border border-[#4b4039] rounded-lg px-3 py-3 text-sm outline-none focus:border-[#d8a849]"
                   >
-
                     {loadingPackages ? (
-                      <option>
-                        Loading packages...
-                      </option>
-                    ) : packages.length ===
-                      0 ? (
-                      <option value="">
-                        No packages available
-                      </option>
+                      <option>Loading packages...</option>
+                    ) : packages.length === 0 ? (
+                      <option value="">No packages available</option>
                     ) : (
-                      packages.map(
-                        (
-                          pkg
-                        ) => (
-                          <option
-                            key={
-                              pkg.id
-                            }
-                            value={
-                              pkg.id
-                            }
-                          >
-                            {
-                              pkg.name
-                            }
-                          </option>
-                        )
-                      )
+                      packages.map((pkg) => (
+                        <option key={pkg.id} value={pkg.id}>
+                          {pkg.name}
+                        </option>
+                      ))
                     )}
-
                   </select>
-
                 </div>
 
                 {/* OCCASION */}
 
                 <div>
-
                   <label className="block text-xs text-[#a39790] mb-2">
                     Occasion
                   </label>
 
                   <select
-                    value={
-                      occasion
-                    }
-                    onChange={(
-                      e
-                    ) =>
-                      setOccasion(
-                        e.target
-                          .value
-                      )
-                    }
+                    value={occasion}
+                    onChange={(e) => setOccasion(e.target.value)}
                     className="w-full bg-[#201813] border border-[#4b4039] rounded-lg px-3 py-3 text-sm outline-none focus:border-[#d8a849]"
                   >
+                    <option value="Wedding">Wedding</option>
 
-                    <option value="Wedding">
-                      Wedding
-                    </option>
+                    <option value="Engagement">Engagement</option>
 
-                    <option value="Engagement">
-                      Engagement
-                    </option>
+                    <option value="Reception">Reception</option>
 
-                    <option value="Reception">
-                      Reception
-                    </option>
+                    <option value="Birthday">Birthday</option>
 
-                    <option value="Birthday">
-                      Birthday
-                    </option>
+                    <option value="Anniversary">Anniversary</option>
 
-                    <option value="Anniversary">
-                      Anniversary
-                    </option>
+                    <option value="Haldi Ceremony">Haldi Ceremony</option>
 
-                    <option value="Haldi Ceremony">
-                      Haldi Ceremony
-                    </option>
+                    <option value="Mehndi Ceremony">Mehndi Ceremony</option>
 
-                    <option value="Mehndi Ceremony">
-                      Mehndi Ceremony
-                    </option>
+                    <option value="Sangeet Ceremony">Sangeet Ceremony</option>
 
-                    <option value="Sangeet Ceremony">
-                      Sangeet Ceremony
-                    </option>
+                    <option value="Roka Ceremony">Roka Ceremony</option>
 
-                    <option value="Roka Ceremony">
-                      Roka Ceremony
-                    </option>
+                    <option value="Tilak Ceremony">Tilak Ceremony</option>
 
-                    <option value="Tilak Ceremony">
-                      Tilak Ceremony
-                    </option>
+                    <option value="Ring Ceremony">Ring Ceremony</option>
 
-                    <option value="Ring Ceremony">
-                      Ring Ceremony
-                    </option>
+                    <option value="Cocktail Party">Cocktail Party</option>
 
-                    <option value="Cocktail Party">
-                      Cocktail Party
-                    </option>
+                    <option value="Baby Shower">Baby Shower</option>
 
-                    <option value="Baby Shower">
-                      Baby Shower
-                    </option>
+                    <option value="Naming Ceremony">Naming Ceremony</option>
 
-                    <option value="Naming Ceremony">
-                      Naming Ceremony
-                    </option>
+                    <option value="Retirement Party">Retirement Party</option>
 
-                    <option value="Retirement Party">
-                      Retirement Party
-                    </option>
+                    <option value="Farewell Party">Farewell Party</option>
 
-                    <option value="Farewell Party">
-                      Farewell Party
-                    </option>
+                    <option value="Kitty Party">Kitty Party</option>
 
-                    <option value="Kitty Party">
-                      Kitty Party
-                    </option>
+                    <option value="Corporate Event">Corporate Event</option>
 
-                    <option value="Corporate Event">
-                      Corporate Event
-                    </option>
+                    <option value="Business Meeting">Business Meeting</option>
 
-                    <option value="Business Meeting">
-                      Business Meeting
-                    </option>
+                    <option value="Conference">Conference</option>
 
-                    <option value="Conference">
-                      Conference
-                    </option>
+                    <option value="Product Launch">Product Launch</option>
 
-                    <option value="Product Launch">
-                      Product Launch
-                    </option>
+                    <option value="Award Ceremony">Award Ceremony</option>
 
-                    <option value="Award Ceremony">
-                      Award Ceremony
-                    </option>
-
-                    <option value="Cultural Event">
-                      Cultural Event
-                    </option>
+                    <option value="Cultural Event">Cultural Event</option>
 
                     <option value="Religious Ceremony">
                       Religious Ceremony
                     </option>
 
-                    <option value="Family Function">
-                      Family Function
-                    </option>
+                    <option value="Family Function">Family Function</option>
 
-                    <option value="Social Gathering">
-                      Social Gathering
-                    </option>
+                    <option value="Social Gathering">Social Gathering</option>
 
                     <option value="Festival Celebration">
                       Festival Celebration
                     </option>
 
-                    <option value="Golden Jubilee">
-                      Golden Jubilee
-                    </option>
+                    <option value="Golden Jubilee">Golden Jubilee</option>
 
-                    <option value="Silver Jubilee">
-                      Silver Jubilee
-                    </option>
+                    <option value="Silver Jubilee">Silver Jubilee</option>
 
-                    <option value="Graduation Party">
-                      Graduation Party
-                    </option>
+                    <option value="Graduation Party">Graduation Party</option>
 
-                    <option value="Reunion">
-                      Reunion
-                    </option>
+                    <option value="Reunion">Reunion</option>
 
-                    <option value="Other">
-                      Other
-                    </option>
-
+                    <option value="Other">Other</option>
                   </select>
-
                 </div>
 
                 {/* GUESTS */}
 
                 <div>
-
                   <label className="block text-xs text-[#a39790] mb-2">
                     Number of Guests
                   </label>
@@ -1270,27 +845,13 @@ const BookNow = () => {
                   <input
                     type="number"
                     min="1"
-                    value={
-                      guests
-                    }
-                    onChange={(
-                      e
-                    ) =>
-                      setGuests(
-                        Math.max(
-                          1,
-                          Number(
-                            e.target
-                              .value
-                          )
-                        )
-                      )
+                    value={guests}
+                    onChange={(e) =>
+                      setGuests(Math.max(1, Number(e.target.value)))
                     }
                     className="w-full bg-[#201813] border border-[#4b4039] rounded-lg px-3 py-3 text-sm outline-none focus:border-[#d8a849]"
                   />
-
                 </div>
-
               </div>
 
               {/* ====================================
@@ -1298,100 +859,60 @@ const BookNow = () => {
               ==================================== */}
 
               <div className="mt-6 pt-6 border-t border-[#3a2f29]">
-
                 <h3 className="text-sm font-medium mb-4">
                   Customer Information
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-
                   {/* NAME */}
 
                   <div>
-
                     <label className="block text-xs text-[#a39790] mb-2">
                       Name
                     </label>
 
                     <input
                       type="text"
-                      value={
-                        customerName
-                      }
-                      onChange={(
-                        e
-                      ) =>
-                        setCustomerName(
-                          e.target
-                            .value
-                        )
-                      }
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
                       placeholder="Your name"
                       className="w-full bg-[#201813] border border-[#3d332c] rounded-lg px-3 py-3 text-sm outline-none focus:border-[#d8a849] placeholder:text-[#625850]"
                     />
-
                   </div>
 
                   {/* MOBILE */}
 
                   <div>
-
                     <label className="block text-xs text-[#a39790] mb-2">
-                      Mobile{" "}
-                      <span className="text-red-600">
-                        *
-                      </span>
+                      Mobile <span className="text-red-600">*</span>
                     </label>
 
                     <input
                       type="tel"
                       required
-                      value={
-                        customerMobile
-                      }
-                      onChange={(
-                        e
-                      ) =>
-                        setCustomerMobile(
-                          e.target
-                            .value
-                        )
-                      }
+                      value={customerMobile}
+                      onChange={(e) => setCustomerMobile(e.target.value)}
                       placeholder="Mobile number"
                       className="w-full bg-[#201813] border border-[#3d332c] rounded-lg px-3 py-3 text-sm outline-none focus:border-[#d8a849] placeholder:text-[#625850]"
                     />
-
                   </div>
 
                   {/* EMAIL */}
 
                   <div>
-
                     <label className="block text-xs text-[#a39790] mb-2">
                       Email
                     </label>
 
                     <input
                       type="email"
-                      value={
-                        customerEmail
-                      }
-                      onChange={(
-                        e
-                      ) =>
-                        setCustomerEmail(
-                          e.target
-                            .value
-                        )
-                      }
+                      value={customerEmail}
+                      onChange={(e) => setCustomerEmail(e.target.value)}
                       placeholder="Email address"
                       className="w-full bg-[#201813] border border-[#3d332c] rounded-lg px-3 py-3 text-sm outline-none focus:border-[#d8a849] placeholder:text-[#625850]"
                     />
-
                   </div>
-
                 </div>
-
               </div>
 
               {/* ====================================
@@ -1399,31 +920,18 @@ const BookNow = () => {
               ==================================== */}
 
               <div className="mt-6">
-
                 <label className="block text-xs text-[#a39790] mb-2">
-                  Enter Your Complete
-                  Address{" "}
-                  <span className="text-red-600">
-                    *
-                  </span>
+                  Enter Your Complete Address{" "}
+                  <span className="text-red-600">*</span>
                 </label>
 
                 <textarea
                   rows={3}
-                  value={
-                    address
-                  }
-                  onChange={(
-                    e
-                  ) =>
-                    setAddress(
-                      e.target.value
-                    )
-                  }
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
                   placeholder="Enter your complete address..."
                   className="w-full bg-[#201813] border border-[#4b4039] rounded-lg px-3 py-3 text-sm outline-none focus:border-[#d8a849] resize-none placeholder:text-[#625850]"
                 />
-
               </div>
 
               {/* ====================================
@@ -1431,31 +939,19 @@ const BookNow = () => {
               ==================================== */}
 
               <div className="mt-6">
-
                 <label className="block text-xs text-[#a39790] mb-2">
                   Special Requests
                 </label>
 
                 <textarea
                   rows={4}
-                  value={
-                    requests
-                  }
-                  onChange={(
-                    e
-                  ) =>
-                    setRequests(
-                      e.target.value
-                    )
-                  }
+                  value={requests}
+                  onChange={(e) => setRequests(e.target.value)}
                   placeholder="Decoration, catering, parking, special arrangements..."
                   className="w-full bg-[#201813] border border-[#4b4039] rounded-lg px-3 py-3 text-sm outline-none focus:border-[#d8a849] resize-none placeholder:text-[#625850]"
                 />
-
               </div>
-
             </div>
-
           </div>
 
           {/* ========================================
@@ -1463,229 +959,139 @@ const BookNow = () => {
           ======================================== */}
 
           <div>
-
             <div className="lg:sticky lg:top-24 bg-[#2b211c] border border-[#3a2f29] rounded-xl p-5">
-
-              <h2 className="text-lg font-medium mb-5">
-                Booking Summary
-              </h2>
+              <h2 className="text-lg font-medium mb-5">Booking Summary</h2>
 
               <div className="space-y-4">
-
                 {/* DATE */}
 
                 <div>
-
-                  <p className="text-xs text-[#81756d]">
-                    Selected Date
-                  </p>
+                  <p className="text-xs text-[#81756d]">Selected Date</p>
 
                   <p className="text-sm mt-1">
                     {selectedDate
-                      ? selectedDate.toLocaleDateString(
-                        "en-IN",
-                        {
+                      ? selectedDate.toLocaleDateString("en-IN", {
                           day: "2-digit",
                           month: "short",
                           year: "numeric",
-                        }
-                      )
+                        })
                       : "Select a date"}
                   </p>
-
                 </div>
 
                 {/* VENUE */}
 
                 <div>
-
-                  <p className="text-xs text-[#81756d]">
-                    Lawn
-                  </p>
+                  <p className="text-xs text-[#81756d]">Lawn</p>
 
                   <p className="text-sm mt-1">
-                    {venues.find(
-                      (v) =>
-                        v.id ===
-                        venueId
-                    )?.name ||
+                    {venues.find((v) => v.id === venueId)?.name ||
                       "Select lawn"}
                   </p>
-
                 </div>
 
                 {/* PACKAGE */}
 
                 <div>
-
-                  <p className="text-xs text-[#81756d]">
-                    Package
-                  </p>
+                  <p className="text-xs text-[#81756d]">Package</p>
 
                   <p className="text-sm mt-1">
-                    {selectedPackage
-                      ?.name ||
-                      "Select package"}
+                    {selectedPackage?.name || "Select package"}
                   </p>
-
                 </div>
 
                 {/* OCCASION */}
 
                 <div>
+                  <p className="text-xs text-[#81756d]">Occasion</p>
 
-                  <p className="text-xs text-[#81756d]">
-                    Occasion
-                  </p>
-
-                  <p className="text-sm mt-1">
-                    {occasion}
-                  </p>
-
+                  <p className="text-sm mt-1">{occasion}</p>
                 </div>
 
                 {/* GUESTS */}
 
                 <div>
+                  <p className="text-xs text-[#81756d]">Guests</p>
 
-                  <p className="text-xs text-[#81756d]">
-                    Guests
-                  </p>
-
-                  <p className="text-sm mt-1">
-                    {guests}
-                  </p>
-
+                  <p className="text-sm mt-1">{guests}</p>
                 </div>
 
                 {/* AVAILABILITY */}
 
                 <div className="bg-[#22271f] rounded-lg p-3">
-
                   {selectedDate ? (
-                    availability[
-                      getDateKey(
-                        selectedDate
-                      )
-                    ]?.available ===
-                      false ? (
+                    availability[getDateKey(selectedDate)]?.available ===
+                    false ? (
                       <div className="flex items-center gap-2">
-
                         <span className="w-2 h-2 rounded-full bg-red-500" />
 
                         <span className="text-xs text-red-400">
-                          Selected date
-                          is unavailable
+                          Selected date is unavailable
                         </span>
-
                       </div>
                     ) : (
                       <div className="flex items-center gap-2">
-
                         <span className="w-2 h-2 rounded-full bg-[#62a86c]" />
 
                         <span className="text-xs text-[#76ab7b]">
-                          This date is
-                          available
+                          This date is available
                         </span>
-
                       </div>
                     )
                   ) : (
                     <span className="text-xs text-[#8b7e76]">
-                      Select a date to
-                      check availability
+                      Select a date to check availability
                     </span>
                   )}
-
                 </div>
 
                 {/* PRICE */}
 
                 <div className="border-t border-[#3a2f29] pt-4 space-y-3">
-
                   {/* BASE */}
 
                   <div className="flex items-center justify-between">
+                    <span className="text-xs text-[#968980]">Base package</span>
 
-                    <span className="text-xs text-[#968980]">
-                      Base package
-                    </span>
-
-                    <span className="text-sm">
-                      {formatCurrency(
-                        basePrice
-                      )}
-                    </span>
-
+                    <span className="text-sm">{formatCurrency(basePrice)}</span>
                   </div>
 
                   {/* EXTRA GUESTS */}
 
                   <div className="flex items-center justify-between">
-
-                    <span className="text-xs text-[#968980]">
-                      Extra guests
-                    </span>
+                    <span className="text-xs text-[#968980]">Extra guests</span>
 
                     <span className="text-sm">
-                      {formatCurrency(
-                        extraGuestAmount
-                      )}
+                      {formatCurrency(extraGuestAmount)}
                     </span>
-
                   </div>
 
                   {/* SUBTOTAL */}
 
                   <div className="flex items-center justify-between">
+                    <span className="text-xs text-[#968980]">Subtotal</span>
 
-                    <span className="text-xs text-[#968980]">
-                      Subtotal
-                    </span>
-
-                    <span className="text-sm">
-                      {formatCurrency(
-                        subtotal
-                      )}
-                    </span>
-
+                    <span className="text-sm">{formatCurrency(subtotal)}</span>
                   </div>
 
                   {/* GST */}
 
                   <div className="flex items-center justify-between">
+                    <span className="text-xs text-[#968980]">GST (18%)</span>
 
-                    <span className="text-xs text-[#968980]">
-                      GST (18%)
-                    </span>
-
-                    <span className="text-sm">
-                      {formatCurrency(
-                        gst
-                      )}
-                    </span>
-
+                    <span className="text-sm">{formatCurrency(gst)}</span>
                   </div>
 
                   {/* TOTAL */}
 
                   <div className="flex items-center justify-between pt-2">
-
-                    <span className="text-sm font-medium">
-                      Total
-                    </span>
+                    <span className="text-sm font-medium">Total</span>
 
                     <span className="text-xl font-semibold text-[#d8a849]">
-                      {formatCurrency(
-                        total
-                      )}
+                      {formatCurrency(total)}
                     </span>
-
                   </div>
-
                 </div>
-
               </div>
 
               {/* ======================================
@@ -1714,9 +1120,7 @@ const BookNow = () => {
 
               <button
                 type="button"
-                onClick={
-                  handleBooking
-                }
+                onClick={handleBooking}
                 disabled={
                   bookingLoading ||
                   !selectedDate ||
@@ -1726,37 +1130,25 @@ const BookNow = () => {
                 }
                 className="w-full mt-5 py-3 bg-[#d8a849] hover:bg-[#c99a3d] disabled:bg-[#594c37] disabled:text-[#887b69] disabled:cursor-not-allowed text-black text-sm font-medium rounded-lg transition flex items-center justify-center gap-2"
               >
-
                 {bookingLoading ? (
                   <>
-                    <Loader2
-                      size={16}
-                      className="animate-spin"
-                    />
-
+                    <Loader2 size={16} className="animate-spin" />
                     Sending...
                   </>
                 ) : (
                   "Request Booking"
                 )}
-
               </button>
 
               <p className="text-[10px] text-[#71655d] text-center mt-3">
-                Final booking confirmation
-                will be done by the admin.
+                Final booking confirmation will be done by the admin.
               </p>
-
             </div>
-
           </div>
-
         </div>
-
       </main>
 
       <Footer />
-
     </div>
   );
 };
