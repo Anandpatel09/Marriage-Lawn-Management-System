@@ -259,10 +259,10 @@ export const getMyBookings = async (req, res) => {
           booking.updated_at,
       }));
 
-    console.log(
-      `${type} bookings for user ${userId}:`,
-      formattedBookings
-    );
+    // console.log(
+    //   `${type} bookings for user ${userId}:`,
+    //   formattedBookings
+    // );
 
     return res.status(200).json({
       type,

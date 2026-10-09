@@ -1,8 +1,4 @@
-import {
-    Navigate,
-    Routes,
-    Route,
-} from "react-router-dom";
+import { Navigate, Routes, Route } from "react-router-dom";
 
 import Home from "../pages/public/Home";
 import Contact from "../pages/public/Contact";
@@ -25,109 +21,54 @@ import AdminProfile from "../pages/admin/adminNavbarData/AdminProfile";
 import UserProfile from "../pages/customer/UserProfile";
 import Availability from "../pages/admin/Availability";
 import Bookings from "../pages/admin/Booking/Bookings";
-import OurLawns from "../pages/public/OurLawns";
+import OurLawns from "../pages/public/OwerLawn/OurLawns";
 
 const AppRoutes = () => {
-    return (
-        <Routes>
+  return (
+    <Routes>
+      {/* ================= AUTH ================= */}
 
-            {/* ================= AUTH ================= */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
 
-            <Route
-                path="/"
-                element={
-                    <Navigate
-                        to="/login"
-                        replace
-                    />
-                }
-            />
+      <Route path="/login" element={<Login />} />
 
-            <Route
-                path="/login"
-                element={<Login />}
-            />
+      <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
-            <Route
-                path="/register"
-                element={<Register />}
-            />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
+      {/* ================= PUBLIC ================= */}
 
-            {/* ================= PUBLIC ================= */}
+      <Route path="/contact" element={<Contact />} />
 
-            <Route
-                path="/contact"
-                element={<Contact />}
-            />
+      <Route path="/about" element={<About />} />
 
-            <Route
-                path="/about"
-                element={<About />}
-            />
+      <Route path="/packages" element={<Packages />} />
 
-            <Route
-                path="/packages"
-                element={<Packages />}
-            />
+      {/* ================= PROTECTED ================= */}
 
+      <Route element={<ProtectedRoute />}>
+        <Route path="/profile" element={<UserProfile />} />
 
-            {/* ================= PROTECTED ================= */}
+        <Route path="/home" element={<Home />} />
 
-            <Route element={<ProtectedRoute />}>
+        <Route path="/bookings-public" element={<BookingsPublic />} />
 
-                <Route
-                    path="/profile"
-                    element={<UserProfile />}
-                />
+        <Route path="/booknow" element={<BookNow />} />
+      </Route>
 
-                <Route
-                    path="/home"
-                    element={<Home />}
-                />
+      {/* ================= ADMIN ================= */}
 
-                <Route
-                    path="/bookings-public"
-                    element={<BookingsPublic />}
-                />
+      <Route element={<AdminRoute />}>
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+      </Route>
 
-                <Route
-                    path="/booknow"
-                    element={<BookNow />}
-                />
+      <Route path="/admin/profile" element={<AdminProfile />} />
+      <Route path="/admin/availability" element={<Availability />} />
 
-            </Route>
-
-
-            {/* ================= ADMIN ================= */}
-
-            <Route element={<AdminRoute />}>
-                <Route
-                    path="/admin/dashboard"
-                    element={<AdminDashboard />}
-                />
-            </Route>
-
-            <Route
-                path="/admin/profile"
-                element={<AdminProfile />}
-            />
-            <Route
-                path="/admin/availability"
-                element={<Availability />}
-            />
-
-            <Route
-                path="/admin/bookings"
-                element={<Bookings />}
-            />
-            <Route
-                path="/lawns"
-                element={<OurLawns />}
-            />
-        </Routes>
-    );
+      <Route path="/admin/bookings" element={<Bookings />} />
+      <Route path="/lawns" element={<OurLawns />} />
+    </Routes>
+  );
 };
 
 export default AppRoutes;

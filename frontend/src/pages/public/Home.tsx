@@ -63,7 +63,9 @@ const Home = () => {
                 Check availability
               </button>
 
-              <button className="px-8 py-4 border border-[#62534a] bg-[#17120f]/70 hover:bg-[#2b211c] text-white font-medium rounded-lg transition">
+              <button 
+              onClick={() => navigate('/lawns')}
+              className="px-8 py-4 border border-[#62534a] bg-[#17120f]/70 hover:bg-[#2b211c] text-white font-medium rounded-lg transition">
                 Explore lawns
               </button>
 

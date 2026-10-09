@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { CalendarDays, MapPin, Loader2 } from "lucide-react";
 
@@ -57,7 +56,7 @@ const Bookings = () => {
   // =====================================================
 
   const [activeTab, setActiveTab] = useState<"upcoming" | "past">("upcoming");
-  const navigate=useNavigate();
+  const navigate = useNavigate();
   // =====================================================
   // BOOKINGS
   // =====================================================
@@ -227,10 +226,9 @@ const Bookings = () => {
                 text-[10px]
                 rounded
                 transition
-                ${
-                  activeTab === "upcoming"
-                    ? "bg-[#17120f] text-white"
-                    : "text-[#8f827a]"
+                ${activeTab === "upcoming"
+                  ? "bg-[#17120f] text-white"
+                  : "text-[#8f827a]"
                 }
               `}
             >
@@ -248,10 +246,9 @@ const Bookings = () => {
                 text-[10px]
                 rounded
                 transition
-                ${
-                  activeTab === "past"
-                    ? "bg-[#17120f] text-white"
-                    : "text-[#8f827a]"
+                ${activeTab === "past"
+                  ? "bg-[#17120f] text-white"
+                  : "text-[#8f827a]"
                 }
               `}
             >
@@ -516,7 +513,7 @@ const Bookings = () => {
 
                         <button
                           type="button"
-                          onClick={()=>navigate("/contact")}
+                          onClick={() => navigate("/contact")}
                           className="w-full mt-3 py-2 border border-[#51463e] rounded text-[11px] text-white hover:bg-[#302721] transition"
                         >
                           Contact coordinator
@@ -537,6 +534,3 @@ const Bookings = () => {
 };
 
 export default Bookings;
-
-
-
