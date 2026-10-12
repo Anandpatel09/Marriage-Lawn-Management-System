@@ -9,6 +9,7 @@ import availabilityRoutes from "./routes/availability.routes.js";
 import venueRoutes from "./routes/venue.routes.js";
 import packageRoutes from "./routes/package.routes.js";
 import bookingRoutes from "./routes/booking.routes.js";
+import paymentRoutes from "./routes/payment.routes.js";
 
 
 dotenv.config();
@@ -70,6 +71,10 @@ app.get("/", (req, res) => {
   });
 });
 
+
+//===================Payment Route============
+
+app.use("/api/payments", paymentRoutes);
 
 export default app;
 

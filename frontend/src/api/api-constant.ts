@@ -24,12 +24,15 @@ export const API = {
 
   BOOKING: {
     CREATE: "/api/bookings",
-    MY_BOOKINGS: "/api/bookings/my-bookings", 
+    MY_BOOKINGS: "/api/bookings/my-bookings",
   },
 
   CONTACT: {
     ENQUIRY: "/api/contact/enquiry",
   },
+  PAYMENT: {
+  CREATE_ORDER: "/api/payments/create-order",
+  VERIFY: "/api/payments/verify",
+  FAILURE: "/api/payments/failure",
+},
 };
-
-

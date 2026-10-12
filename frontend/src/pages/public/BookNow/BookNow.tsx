@@ -1,4 +1,4 @@
-import { Loader2 } from "lucide-react";
+import { Banknote, CreditCard, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import Navbar from "../../../components/comman/Navbar";
@@ -45,6 +45,55 @@ interface AvailabilityMap {
   };
 }
 
+
+
+//===========================================
+// for payment
+
+interface RazorpayPaymentResponse {
+  razorpay_payment_id: string;
+  razorpay_order_id: string;
+  razorpay_signature: string;
+}
+
+interface RazorpayOptions {
+  key: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  order_id: string;
+  handler: (
+    response: RazorpayPaymentResponse
+  ) => void | Promise<void>;
+  prefill?: {
+    name?: string;
+    email?: string;
+    contact?: string;
+  };
+  theme?: {
+    color: string;
+  };
+  modal?: {
+    ondismiss?: () => void;
+  };
+}
+
+interface RazorpayInstance {
+  open: () => void;
+  on: (
+    event: string,
+    callback: (response: any) => void
+  ) => void;
+}
+
+declare global {
+  interface Window {
+    Razorpay?: new (
+      options: RazorpayOptions
+    ) => RazorpayInstance;
+  }
+}
 // =====================================================
 // COMPONENT
 // =====================================================
@@ -63,6 +112,9 @@ const BookNow = () => {
   );
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
+  const [isPaymentModalOpen, setIsPaymentModalOpen] =
+  useState(false);
 
   // ===================================================
   // VENUES
@@ -296,330 +348,312 @@ const BookNow = () => {
   // CREATE BOOKING
   // ===================================================
 
-  // const handleBooking =
-  //   async () => {
-  //     try {
-  //       setBookingLoading(
-  //         true
-  //       );
+ 
+  // const handleBooking = async () => {
+  //   try {
+  //     setBookingLoading(true);
 
-  //       setErrorMessage("");
-  //       setSuccessMessage("");
+  //     setErrorMessage("");
+  //     setSuccessMessage("");
 
-  //       // --------------------------------------------
-  //       // LOGIN CHECK
-  //       // --------------------------------------------
-
-  //       if (
-  //         !isAuthenticated ||
-  //         !user
-  //       ) {
-  //         setErrorMessage(
-  //           "Please login before booking."
-  //         );
-
-  //         return;
-  //       }
-
-  //       // --------------------------------------------
-  //       // DATE CHECK
-  //       // --------------------------------------------
-
-  //       if (!selectedDate) {
-  //         setErrorMessage(
-  //           "Please select a date."
-  //         );
-
-  //         return;
-  //       }
-
-  //       // --------------------------------------------
-  //       // VENUE / PACKAGE CHECK
-  //       // --------------------------------------------
-
-  //       if (
-  //         !venueId ||
-  //         !packageId
-  //       ) {
-  //         setErrorMessage(
-  //           "Please select venue and package."
-  //         );
-
-  //         return;
-  //       }
-
-  //       // --------------------------------------------
-  //       // OCCASION CHECK
-  //       // --------------------------------------------
-
-  //       if (
-  //         !occasion.trim()
-  //       ) {
-  //         setErrorMessage(
-  //           "Please select an occasion."
-  //         );
-
-  //         return;
-  //       }
-
-  //       // --------------------------------------------
-  //       // GUEST CHECK
-  //       // --------------------------------------------
-
-  //       if (
-  //         Number(guests) <= 0
-  //       ) {
-  //         setErrorMessage(
-  //           "Please enter a valid number of guests."
-  //         );
-
-  //         return;
-  //       }
-
-  //       // --------------------------------------------
-  //       // CUSTOMER CHECK
-  //       // --------------------------------------------
-
-  //       if (
-  //         !customerName.trim()
-  //       ) {
-  //         setErrorMessage(
-  //           "Please complete your name in your profile."
-  //         );
-
-  //         return;
-  //       }
-
-  //       if (
-  //         !customerMobile.trim()
-  //       ) {
-  //         setErrorMessage(
-  //           "Please add your mobile number to your profile."
-  //         );
-
-  //         return;
-  //       }
-
-  //       if (
-  //         !customerEmail.trim()
-  //       ) {
-  //         setErrorMessage(
-  //           "Please add your email to your profile."
-  //         );
-
-  //         return;
-  //       }
-
-  //       // --------------------------------------------
-  //       // ADDRESS CHECK
-  //       // --------------------------------------------
-
-  //       if (
-  //         !address.trim()
-  //       ) {
-  //         setErrorMessage(
-  //           "Please enter your complete address."
-  //         );
-
-  //         return;
-  //       }
-
-  //       // --------------------------------------------
-  //       // BOOKING DATE
-  //       // --------------------------------------------
-
-  //       const bookingDate =
-  //         getDateKey(
-  //           selectedDate
-  //         );
-
-  //       // --------------------------------------------
-  //       // API REQUEST
-  //       // --------------------------------------------
-
-  //       const response =
-  //         await axiosInstance.post(
-  //           API.BOOKING.CREATE,
-  //           {
-  //             venueId,
-  //             packageId,
-  //             occasion,
-  //             bookingDate,
-  //             guests: Number(
-  //               guests
-  //             ),
-
-  //             // Important:
-  //             // backend stores this as customer_address
-  //             customerAddress:
-  //               address.trim(),
-
-  //             specialRequests:
-  //               requests.trim() ||
-  //               null,
-  //           }
-  //         );
-
-  //       console.log(
-  //         "Booking response:",
-  //         response.data
-  //       );
-
-  //       // --------------------------------------------
-  //       // SUCCESS
-  //       // --------------------------------------------
-
-  //       setSuccessMessage(
-  //         response.data.message ||
-  //         "Booking request submitted successfully!"
-  //       );
-
-  //       // --------------------------------------------
-  //       // REFRESH AVAILABILITY
-  //       // --------------------------------------------
-
-  //       await fetchAvailability();
-
-  //       // --------------------------------------------
-  //       // RESET
-  //       // --------------------------------------------
-
-  //       setSelectedDate(
-  //         null
-  //       );
-
-  //       setRequests("");
-
-  //     } catch (error: any) {
-  //       console.error(
-  //         "Booking error:",
-  //         error
-  //       );
-
-  //       setErrorMessage(
-  //         error?.response?.data
-  //           ?.message ||
-  //         "Failed to create booking."
-  //       );
-  //     } finally {
-  //       setBookingLoading(
-  //         false
-  //       );
+  //     if (!isAuthenticated) {
+  //       setErrorMessage("Please login before booking.");
+  //       return;
   //     }
-  //   };
 
-  const handleBooking = async () => {
-    try {
-      setBookingLoading(true);
+  //     if (!selectedDate) {
+  //       setErrorMessage("Please select a date.");
+  //       return;
+  //     }
 
-      setErrorMessage("");
-      setSuccessMessage("");
+  //     if (!venueId) {
+  //       setErrorMessage("Please select a marriage lawn.");
+  //       return;
+  //     }
 
-      if (!isAuthenticated) {
-        setErrorMessage("Please login before booking.");
-        return;
-      }
+  //     if (!packageId) {
+  //       setErrorMessage("Please select a package.");
+  //       return;
+  //     }
 
-      if (!selectedDate) {
-        setErrorMessage("Please select a date.");
-        return;
-      }
+  //     if (!occasion.trim()) {
+  //       setErrorMessage("Please select an occasion.");
+  //       return;
+  //     }
 
-      if (!venueId) {
-        setErrorMessage("Please select a marriage lawn.");
-        return;
-      }
+  //     if (Number(guests) <= 0) {
+  //       setErrorMessage("Please enter a valid number of guests.");
+  //       return;
+  //     }
 
-      if (!packageId) {
-        setErrorMessage("Please select a package.");
-        return;
-      }
+  //     if (!customerName.trim()) {
+  //       setErrorMessage("Please enter customer name.");
+  //       return;
+  //     }
 
-      if (!occasion.trim()) {
-        setErrorMessage("Please select an occasion.");
-        return;
-      }
+  //     if (!customerMobile.trim()) {
+  //       setErrorMessage("Please enter customer mobile number.");
+  //       return;
+  //     }
 
-      if (Number(guests) <= 0) {
-        setErrorMessage("Please enter a valid number of guests.");
-        return;
-      }
+  //     if (!customerEmail.trim()) {
+  //       setErrorMessage("Please enter customer email.");
+  //       return;
+  //     }
 
-      if (!customerName.trim()) {
-        setErrorMessage("Please enter customer name.");
-        return;
-      }
+  //     if (!address.trim()) {
+  //       setErrorMessage("Please enter complete address.");
+  //       return;
+  //     }
 
-      if (!customerMobile.trim()) {
-        setErrorMessage("Please enter customer mobile number.");
-        return;
-      }
+  //     const bookingDate = getDateKey(selectedDate);
 
-      if (!customerEmail.trim()) {
-        setErrorMessage("Please enter customer email.");
-        return;
-      }
+  //     const payload = {
+  //       // Event information
+  //       venueId,
+  //       packageId,
+  //       occasion,
+  //       bookingDate,
+  //       guests: Number(guests),
 
-      if (!address.trim()) {
-        setErrorMessage("Please enter complete address.");
-        return;
-      }
+  //       // Customer information
+  //       customerName: customerName.trim(),
 
-      const bookingDate = getDateKey(selectedDate);
+  //       customerMobile: customerMobile.trim(),
 
-      const payload = {
-        // Event information
-        venueId,
-        packageId,
-        occasion,
-        bookingDate,
-        guests: Number(guests),
+  //       customerEmail: customerEmail.trim(),
 
-        // Customer information
-        customerName: customerName.trim(),
+  //       customerAddress: address.trim(),
 
-        customerMobile: customerMobile.trim(),
+  //       // Optional
+  //       specialRequests: requests.trim() || null,
+  //     };
 
-        customerEmail: customerEmail.trim(),
+  //     console.log("BOOKING PAYLOAD:", payload);
 
-        customerAddress: address.trim(),
+  //     const response = await axiosInstance.post(API.BOOKING.CREATE, payload);
 
-        // Optional
-        specialRequests: requests.trim() || null,
-      };
+  //     console.log("Booking response:", response.data);
 
-      console.log("BOOKING PAYLOAD:", payload);
+  //     setSuccessMessage(
+  //       response.data.message || "Booking request submitted successfully!",
+  //     );
 
-      const response = await axiosInstance.post(API.BOOKING.CREATE, payload);
+  //     // Refresh calendar
+  //     await fetchAvailability();
 
-      console.log("Booking response:", response.data);
+  //     // Reset date
+  //     setSelectedDate(null);
 
-      setSuccessMessage(
-        response.data.message || "Booking request submitted successfully!",
+  //     // Reset customer fields
+  //     setCustomerName("");
+  //     setCustomerMobile("");
+  //     setCustomerEmail("");
+  //     setAddress("");
+  //     setRequests("");
+  //   } catch (error: any) {
+  //     console.error("Booking error:", error);
+
+  //     setErrorMessage(
+  //       error?.response?.data?.message || "Failed to create booking.",
+  //     );
+  //   } finally {
+  //     setBookingLoading(false);
+  //   }
+  // };
+
+  const handleBooking = () => {
+  setErrorMessage("");
+  setSuccessMessage("");
+
+  if (!isAuthenticated) {
+    setErrorMessage("Please login before booking.");
+    return;
+  }
+
+  if (!selectedDate) {
+    setErrorMessage("Please select a booking date.");
+    return;
+  }
+
+  if (!venueId || !packageId) {
+    setErrorMessage("Please select a lawn and package.");
+    return;
+  }
+
+  if (
+    !customerName.trim() ||
+    !customerMobile.trim() ||
+    !customerEmail.trim() ||
+    !address.trim()
+  ) {
+    setErrorMessage(
+      "Please complete all required customer information."
+    );
+    return;
+  }
+
+  if (Number(guests) <= 0) {
+    setErrorMessage("Please enter a valid guest count.");
+    return;
+  }
+
+  setIsPaymentModalOpen(true);
+};
+
+///payment submit code===========================
+
+
+const submitBooking = async (
+  paymentMethod: "pay_at_lawn" | "online"
+) => {
+  if (!selectedDate || !venueId || !packageId) {
+    setErrorMessage("Select a date, lawn and package.");
+    return;
+  }
+
+  let bookingId: number | null = null;
+
+  try {
+    setBookingLoading(true);
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    const payload = {
+      venueId,
+      packageId,
+      occasion,
+      bookingDate: getDateKey(selectedDate),
+      guests: Number(guests),
+      customerName: customerName.trim(),
+      customerMobile: customerMobile.trim(),
+      customerEmail: customerEmail.trim(),
+      customerAddress: address.trim(),
+      specialRequests: requests.trim() || null,
+    };
+
+    // CASH: create a booking without online payment.
+    if (paymentMethod === "pay_at_lawn") {
+      const response = await axiosInstance.post(
+        API.BOOKING.CREATE,
+        { ...payload, paymentMethod: "pay_at_lawn" }
       );
 
-      // Refresh calendar
+      setIsPaymentModalOpen(false);
+      setSuccessMessage(
+        response.data.message ||
+        "Booking request submitted. Payment is due at the lawn."
+      );
+
       await fetchAvailability();
-
-      // Reset date
       setSelectedDate(null);
-
-      // Reset customer fields
       setCustomerName("");
       setCustomerMobile("");
       setCustomerEmail("");
       setAddress("");
       setRequests("");
-    } catch (error: any) {
-      console.error("Booking error:", error);
+      return;
+    }
+
+    // ONLINE: ask backend to calculate the price and create an order.
+    const response = await axiosInstance.post(
+      API.PAYMENT.CREATE_ORDER,
+      payload
+    );
+
+    const data = response.data;
+    bookingId = Number(data.bookingId);
+
+    if (!bookingId || !data.razorpayOrderId || !data.keyId) {
+      throw new Error("The server did not return a valid payment order.");
+    }
+
+    if (!window.Razorpay) {
+      // Do not mark the booking as paid.
+      throw new Error(
+        "Razorpay Checkout did not load. Reload the page and check your booking before retrying."
+      );
+    }
+
+    const checkout = new window.Razorpay({
+      key: data.keyId,
+      amount: data.amount,
+      currency: data.currency || "INR",
+      name: "Durga Marriage Lawn",
+      description: "Marriage lawn booking payment",
+      order_id: data.razorpayOrderId,
+      prefill: {
+        name: customerName.trim(),
+        email: customerEmail.trim(),
+        contact: customerMobile.trim(),
+      },
+      theme: { color: "#d8a849" },
+
+      handler: async (
+        paymentResponse: RazorpayPaymentResponse
+      ) => {
+        setBookingLoading(true);
+
+        try {
+          const verification = await axiosInstance.post(
+            API.PAYMENT.VERIFY,
+            {
+              bookingId,
+              ...paymentResponse,
+            }
+          );
+
+          setIsPaymentModalOpen(false);
+          setSuccessMessage(
+            verification.data.message ||
+            "Payment verified. Your booking awaits admin confirmation."
+          );
+
+          await fetchAvailability();
+          setSelectedDate(null);
+          setCustomerName("");
+          setCustomerMobile("");
+          setCustomerEmail("");
+          setAddress("");
+          setRequests("");
+        } catch (error: any) {
+          console.error("Payment verification error:", error);
+          setErrorMessage(
+            error.response?.data?.message ||
+            "Payment verification is pending. Check My Bookings before paying again."
+          );
+        } finally {
+          setBookingLoading(false);
+        }
+      },
+    });
+
+    checkout.on("payment.failed", async () => {
+      try {
+        await axiosInstance.post(API.PAYMENT.FAILURE, { bookingId });
+      } catch (error) {
+        console.error("Failed to update payment status:", error);
+      }
 
       setErrorMessage(
-        error?.response?.data?.message || "Failed to create booking.",
+        "Payment failed. Check your booking status before attempting another payment."
       );
-    } finally {
-      setBookingLoading(false);
-    }
-  };
+    });
+
+    setIsPaymentModalOpen(false);
+    checkout.open();
+  } catch (error: any) {
+    console.error("Booking/payment error:", error);
+    setErrorMessage(
+      error.response?.data?.message ||
+      error.message ||
+      "Unable to process your booking."
+    );
+  } finally {
+    setBookingLoading(false);
+  }
+};
+
 
   // =====================================================
   // RENDER
@@ -1139,10 +1173,95 @@ const BookNow = () => {
                   "Request Booking"
                 )}
               </button>
-
+              
               <p className="text-[10px] text-[#71655d] text-center mt-3">
                 Final booking confirmation will be done by the admin.
               </p>
+
+              {/* payment related code  */}
+
+              {isPaymentModalOpen && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+    <div className="w-full max-w-lg rounded-2xl border border-[#4b4039] bg-[#2b211c] p-6 shadow-2xl">
+
+      <h2 className="text-xl font-semibold">
+        Choose Payment Method
+      </h2>
+
+      <p className="mt-2 text-sm text-[#a39790]">
+        Select how you would like to pay for your booking.
+      </p>
+
+      <div className="mt-5 rounded-lg bg-[#201813] p-4">
+        <p className="text-xs text-[#9e9188]">
+          Total booking amount
+        </p>
+
+        <p className="mt-1 text-2xl font-semibold text-[#d8a849]">
+          {formatCurrency(total)}
+        </p>
+      </div>
+
+      <button
+        type="button"
+        disabled={bookingLoading}
+        onClick={() => submitBooking("pay_at_lawn")}
+        className="mt-5 flex w-full items-center gap-4 rounded-xl border border-[#514239] bg-[#201813] p-4 text-left transition hover:border-[#d8a849] disabled:opacity-50"
+      >
+        <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#34281f] text-[#d8a849]">
+          <Banknote/>
+        </span>
+
+        <span className="flex-1">
+          <span className="block text-sm font-medium">
+            Pay at Lawn
+          </span>
+
+          <span className="mt-1 block text-xs text-[#9e9188]">
+            Pay in person. Your booking request will be saved.
+          </span>
+        </span>
+      </button>
+
+      <button
+        type="button"
+        disabled={bookingLoading}
+        onClick={() => submitBooking("online")}
+        className="mt-3 flex w-full items-center gap-4 rounded-xl border border-[#514239] bg-[#201813] p-4 text-left transition hover:border-[#d8a849] disabled:opacity-50"
+      >
+        <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#34281f] text-[#d8a849]">
+          <CreditCard />
+        </span>
+
+        <span className="flex-1">
+          <span className="block text-sm font-medium">
+            Pay Online
+          </span>
+
+          <span className="mt-1 block text-xs text-[#9e9188]">
+            Continue to secure Razorpay Checkout.
+          </span>
+        </span>
+      </button>
+
+      <button
+        type="button"
+        disabled={bookingLoading}
+        onClick={() => setIsPaymentModalOpen(false)}
+        className="mt-4 w-full rounded-lg border border-[#514239] px-4 py-3 text-sm text-[#b8aaa1] transition hover:bg-[#382b23] disabled:opacity-50"
+      >
+        Cancel
+      </button>
+
+      {bookingLoading && (
+        <p className="mt-3 text-center text-xs text-[#a39790]">
+          Processing booking...
+        </p>
+      )}
+{/* end payment code  */}
+    </div>
+  </div>
+)}
             </div>
           </div>
         </div>
