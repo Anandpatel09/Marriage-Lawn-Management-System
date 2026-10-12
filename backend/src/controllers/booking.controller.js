@@ -313,9 +313,16 @@ export const createBooking = async (req, res) => {
 /**
  * Get the logged-in customer's bookings.
  */
+// Get upcoming or past bookings for the logged-in customer
 export const getMyBookings = async (req, res) => {
   try {
     const userId = req.user.userId;
+    const type = req.query.type === "past" ? "past" : "upcoming";
+
+    const dateCondition =
+      type === "past"
+        ? "b.booking_date < CURDATE()"
+        : "b.booking_date >= CURDATE()";
 
     const [rows] = await pool.execute(
       `SELECT
@@ -327,53 +334,102 @@ export const getMyBookings = async (req, res) => {
         b.booking_date,
         b.slot,
         b.guests,
+
         b.customer_name,
         b.customer_mobile,
         b.customer_email,
         b.customer_address,
         b.special_requests,
+
         b.base_amount,
         b.extra_guest_count,
         b.extra_guest_amount,
         b.subtotal,
         b.gst_amount,
         b.total_amount,
+
         b.status,
         b.paid_amount,
         b.payment_method,
         b.payment_status,
+
         b.razorpay_order_id,
         b.razorpay_payment_id,
+
         b.created_at,
         b.updated_at,
+
         v.name AS venue_name,
         p.name AS package_name
+
       FROM bookings b
       LEFT JOIN venues v ON v.id = b.venue_id
       LEFT JOIN packages p ON p.id = b.package_id
+
       WHERE b.user_id = ?
-      ORDER BY b.created_at DESC`,
+        AND ${dateCondition}
+
+      ORDER BY b.booking_date ${type === "past" ? "DESC" : "ASC"
+      }, b.created_at DESC`,
       [userId]
     );
 
-    const bookings = rows.map((booking) => ({
-      ...booking,
-      bookingDate: booking.booking_date,
-      venueName: booking.venue_name,
-      packageName: booking.package_name,
-      baseAmount: Number(booking.base_amount || 0),
-      extraGuestCount: Number(booking.extra_guest_count || 0),
-      extraGuestAmount: Number(booking.extra_guest_amount || 0),
-      subtotal: Number(booking.subtotal || 0),
-      gstAmount: Number(booking.gst_amount || 0),
-      totalAmount: Number(booking.total_amount || 0),
-      paidAmount: Number(booking.paid_amount || 0),
-      paymentMethod: booking.payment_method,
-      paymentStatus: booking.payment_status,
-      razorpayPaymentId: booking.razorpay_payment_id,
-    }));
+    const bookings = rows.map((b) => {
+      // MySQL DATE values may be returned as strings or Date objects.
+      const date =
+        b.booking_date instanceof Date
+          ? [
+            b.booking_date.getFullYear(),
+            String(b.booking_date.getMonth() + 1).padStart(2, "0"),
+            String(b.booking_date.getDate()).padStart(2, "0"),
+          ].join("-")
+          : String(b.booking_date).slice(0, 10);
 
-    return res.status(200).json({ bookings });
+      return {
+        id: Number(b.id),
+        bookingId: `DML-${b.id}`,
+
+        // Fields expected by Bookings.tsx
+        title: b.venue_name || "Marriage Lawn Booking",
+        occasion: b.occasion || "",
+
+        venueId: Number(b.venue_id),
+        venueName: b.venue_name || "Venue",
+
+        packageId: Number(b.package_id),
+        packageName: b.package_name || "Package",
+
+        bookingDate: date,
+        slot: b.slot || "full-day",
+        guests: Number(b.guests || 0),
+
+        customerName: b.customer_name || "",
+        customerMobile: b.customer_mobile || "",
+        customerEmail: b.customer_email || "",
+        customerAddress: b.customer_address || "",
+        specialRequests: b.special_requests || null,
+
+        baseAmount: Number(b.base_amount || 0),
+        extraGuestCount: Number(b.extra_guest_count || 0),
+        extraGuestAmount: Number(b.extra_guest_amount || 0),
+        subtotal: Number(b.subtotal || 0),
+        gstAmount: Number(b.gst_amount || 0),
+        totalAmount: Number(b.total_amount || 0),
+
+        paidAmount: Number(b.paid_amount || 0),
+        paymentMethod: b.payment_method,
+        paymentStatus: b.payment_status,
+
+        status: b.status,
+        createdAt: b.created_at,
+        updatedAt: b.updated_at,
+      };
+    });
+
+    return res.status(200).json({
+      message: `${type} bookings fetched successfully.`,
+      bookings,
+    });
   } catch (error) {
     console.error("getMyBookings error:", error);
 

@@ -1,5 +1,6 @@
 import { Banknote, CreditCard, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import Navbar from "../../../components/comman/Navbar";
 import Footer from "../../../components/comman/Footer";
@@ -24,9 +25,6 @@ interface Package {
   id: number;
   name: string;
   description?: string;
-
-  // MySQL DECIMAL can arrive as string,
-  // so we convert it with Number() before calculation.
   base_price: number | string;
   included_guests: number | string;
   extra_guest_price: number | string;
@@ -45,11 +43,6 @@ interface AvailabilityMap {
   };
 }
 
-
-
-//===========================================
-// for payment
-
 interface RazorpayPaymentResponse {
   razorpay_payment_id: string;
   razorpay_order_id: string;
@@ -63,9 +56,7 @@ interface RazorpayOptions {
   name: string;
   description: string;
   order_id: string;
-  handler: (
-    response: RazorpayPaymentResponse
-  ) => void | Promise<void>;
+  handler: (response: RazorpayPaymentResponse) => void | Promise<void>;
   prefill?: {
     name?: string;
     email?: string;
@@ -79,27 +70,42 @@ interface RazorpayOptions {
   };
 }
 
+interface RazorpayFailureResponse {
+  error?: {
+    code?: string;
+    description?: string;
+    reason?: string;
+    metadata?: {
+      order_id?: string;
+      payment_id?: string;
+    };
+  };
+}
+
 interface RazorpayInstance {
   open: () => void;
   on: (
     event: string,
-    callback: (response: any) => void
+    callback: (response: RazorpayFailureResponse) => void,
   ) => void;
 }
 
 declare global {
   interface Window {
-    Razorpay?: new (
-      options: RazorpayOptions
-    ) => RazorpayInstance;
+    Razorpay?: new (options: RazorpayOptions) => RazorpayInstance;
   }
 }
+
 // =====================================================
 // COMPONENT
 // =====================================================
 
 const BookNow = () => {
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  // Prevent duplicate booking/order requests.
+  const submittingRef = useRef(false);
 
   // ===================================================
   // DATE
@@ -113,17 +119,14 @@ const BookNow = () => {
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
-  const [isPaymentModalOpen, setIsPaymentModalOpen] =
-  useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   // ===================================================
   // VENUES
   // ===================================================
 
   const [venues, setVenues] = useState<Venue[]>([]);
-
   const [loadingVenues, setLoadingVenues] = useState(false);
-
   const [venueId, setVenueId] = useState<number | null>(null);
 
   // ===================================================
@@ -131,9 +134,7 @@ const BookNow = () => {
   // ===================================================
 
   const [packages, setPackages] = useState<Package[]>([]);
-
   const [loadingPackages, setLoadingPackages] = useState(false);
-
   const [packageId, setPackageId] = useState<number | null>(null);
 
   // ===================================================
@@ -141,11 +142,8 @@ const BookNow = () => {
   // ===================================================
 
   const [occasion, setOccasion] = useState("Wedding");
-
   const [guests, setGuests] = useState(300);
-
   const [requests, setRequests] = useState("");
-
   const [address, setAddress] = useState("");
 
   // ===================================================
@@ -153,9 +151,7 @@ const BookNow = () => {
   // ===================================================
 
   const [customerName, setCustomerName] = useState("");
-
   const [customerMobile, setCustomerMobile] = useState("");
-
   const [customerEmail, setCustomerEmail] = useState("");
 
   // ===================================================
@@ -163,79 +159,97 @@ const BookNow = () => {
   // ===================================================
 
   const [availability, setAvailability] = useState<AvailabilityMap>({});
-
   const [loadingAvailability, setLoadingAvailability] = useState(false);
 
   // ===================================================
-  // BOOKING STATE
+  // UI STATE
   // ===================================================
 
   const [bookingLoading, setBookingLoading] = useState(false);
-
   const [successMessage, setSuccessMessage] = useState("");
-
   const [errorMessage, setErrorMessage] = useState("");
+
+  // ===================================================
+  // DATE HELPERS
+  // ===================================================
+
+  const getDateKey = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  };
+
+  const formatCurrency = (amount: number): string =>
+    `₹${Number(amount).toLocaleString("en-IN", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
 
   // ===================================================
   // FETCH VENUES
   // ===================================================
 
-  const fetchVenues = async () => {
+  const fetchVenues = useCallback(async () => {
     try {
       setLoadingVenues(true);
 
       const response = await axiosInstance.get(API.VENUE.GET_ALL);
-
-      const venueData = response.data.venues || [];
+      const venueData: Venue[] = response.data.venues || [];
 
       setVenues(venueData);
 
-      if (venueData.length > 0) {
-        setVenueId(venueData[0].id);
-      }
+      setVenueId((previousId) => {
+        if (previousId && venueData.some((v) => v.id === previousId)) {
+          return previousId;
+        }
+
+        return venueData.length > 0 ? venueData[0].id : null;
+      });
     } catch (error) {
       console.error("Venue API error:", error);
-
       setErrorMessage("Failed to load marriage lawns.");
     } finally {
       setLoadingVenues(false);
     }
-  };
+  }, []);
 
   // ===================================================
   // FETCH PACKAGES
   // ===================================================
 
-  const fetchPackages = async () => {
+  const fetchPackages = useCallback(async () => {
     try {
       setLoadingPackages(true);
 
       const response = await axiosInstance.get(API.PACKAGE.GET_ALL);
-
-      const packageData = response.data.packages || [];
+      const packageData: Package[] = response.data.packages || [];
 
       setPackages(packageData);
 
-      if (packageData.length > 0) {
-        setPackageId(packageData[0].id);
-      }
+      setPackageId((previousId) => {
+        if (previousId && packageData.some((p) => p.id === previousId)) {
+          return previousId;
+        }
+
+        return packageData.length > 0 ? packageData[0].id : null;
+      });
     } catch (error) {
       console.error("Package API error:", error);
-
       setErrorMessage("Failed to load packages.");
     } finally {
       setLoadingPackages(false);
     }
-  };
+  }, []);
 
   // ===================================================
   // FETCH AVAILABILITY
   // ===================================================
 
-  const fetchAvailability = async () => {
+  const fetchAvailability = useCallback(async () => {
     if (!venueId) {
       setAvailability({});
-
       return;
     }
 
@@ -251,270 +265,169 @@ const BookNow = () => {
       });
 
       const bookings: AvailabilityItem[] = response.data.bookings || [];
-
       const map: AvailabilityMap = {};
 
       bookings.forEach((booking) => {
-        map[booking.booking_date] = {
-          available: false,
-          status: booking.status,
-        };
+        const dateKey = String(booking.booking_date).slice(0, 10);
+
+        // Pending and confirmed bookings are considered unavailable.
+        // Cancelled/completed bookings should not block the date.
+        if (booking.status === "pending" || booking.status === "confirmed") {
+          map[dateKey] = {
+            available: false,
+            status: booking.status,
+          };
+        }
       });
 
       setAvailability(map);
     } catch (error) {
       console.error("Availability API error:", error);
-
       setAvailability({});
     } finally {
       setLoadingAvailability(false);
     }
-  };
+  }, [venueId, currentMonth]);
+
+  // ===================================================
+  // FETCH CUSTOMER BOOKINGS
+  // ===================================================
+
+  const fetchMyBookings = useCallback(async () => {
+    const response = await axiosInstance.get(API.BOOKING.MY_BOOKINGS, {
+      params: { type: "upcoming" },
+    });
+
+    const bookings = response.data.bookings || [];
+
+    console.log("Latest upcoming bookings:", bookings);
+
+    return bookings;
+  }, []);
 
   // ===================================================
   // INITIAL API CALLS
   // ===================================================
 
   useEffect(() => {
-    fetchVenues();
-    fetchPackages();
-  }, []);
-
-  // ===================================================
-  // AVAILABILITY API
-  // Runs when month/year OR venue changes
-  // ===================================================
+    void fetchVenues();
+    void fetchPackages();
+  }, [fetchVenues, fetchPackages]);
 
   useEffect(() => {
-    fetchAvailability();
-  }, [currentMonth, venueId]);
+    void fetchAvailability();
+  }, [fetchAvailability]);
 
   // ===================================================
-  // SELECTED PACKAGE
+  // SELECTED PACKAGE AND PRICE PREVIEW
+  // This preview is for display only.
+  // The backend must calculate the final amount.
   // ===================================================
 
   const selectedPackage = packages.find((pkg) => pkg.id === packageId);
 
-  // ===================================================
-  // PRICE CALCULATION
-  // ===================================================
-  // Convert MySQL DECIMAL values to Number().
-  // This prevents string concatenation such as:
-  // 125000.00022500
-  // ===================================================
-
   const basePrice = Number(selectedPackage?.base_price ?? 0);
-
   const includedGuests = Number(selectedPackage?.included_guests ?? 0);
-
   const extraGuestPrice = Number(selectedPackage?.extra_guest_price ?? 0);
 
   const extraGuests = Math.max(0, Number(guests) - includedGuests);
-
   const extraGuestAmount = extraGuests * extraGuestPrice;
-
   const subtotal = basePrice + extraGuestAmount;
-
   const gst = Number((subtotal * 0.18).toFixed(2));
-
   const total = Number((subtotal + gst).toFixed(2));
 
   // ===================================================
-  // CURRENCY FORMAT
+  // FORM RESET
   // ===================================================
 
-  const formatCurrency = (amount: number) => {
-    return `₹${Number(amount).toLocaleString("en-IN", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`;
+  const clearCustomerForm = () => {
+    setSelectedDate(null);
+    setCustomerName("");
+    setCustomerMobile("");
+    setCustomerEmail("");
+    setAddress("");
+    setRequests("");
   };
 
   // ===================================================
-  // DATE FORMAT
+  // VALIDATION AND OPEN PAYMENT MODAL
   // ===================================================
-
-  const getDateKey = (date: Date) => {
-    const year = date.getFullYear();
-
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-
-    const day = String(date.getDate()).padStart(2, "0");
-
-    return `${year}-${month}-${day}`;
-  };
-
-  // ===================================================
-  // CREATE BOOKING
-  // ===================================================
-
- 
-  // const handleBooking = async () => {
-  //   try {
-  //     setBookingLoading(true);
-
-  //     setErrorMessage("");
-  //     setSuccessMessage("");
-
-  //     if (!isAuthenticated) {
-  //       setErrorMessage("Please login before booking.");
-  //       return;
-  //     }
-
-  //     if (!selectedDate) {
-  //       setErrorMessage("Please select a date.");
-  //       return;
-  //     }
-
-  //     if (!venueId) {
-  //       setErrorMessage("Please select a marriage lawn.");
-  //       return;
-  //     }
-
-  //     if (!packageId) {
-  //       setErrorMessage("Please select a package.");
-  //       return;
-  //     }
-
-  //     if (!occasion.trim()) {
-  //       setErrorMessage("Please select an occasion.");
-  //       return;
-  //     }
-
-  //     if (Number(guests) <= 0) {
-  //       setErrorMessage("Please enter a valid number of guests.");
-  //       return;
-  //     }
-
-  //     if (!customerName.trim()) {
-  //       setErrorMessage("Please enter customer name.");
-  //       return;
-  //     }
-
-  //     if (!customerMobile.trim()) {
-  //       setErrorMessage("Please enter customer mobile number.");
-  //       return;
-  //     }
-
-  //     if (!customerEmail.trim()) {
-  //       setErrorMessage("Please enter customer email.");
-  //       return;
-  //     }
-
-  //     if (!address.trim()) {
-  //       setErrorMessage("Please enter complete address.");
-  //       return;
-  //     }
-
-  //     const bookingDate = getDateKey(selectedDate);
-
-  //     const payload = {
-  //       // Event information
-  //       venueId,
-  //       packageId,
-  //       occasion,
-  //       bookingDate,
-  //       guests: Number(guests),
-
-  //       // Customer information
-  //       customerName: customerName.trim(),
-
-  //       customerMobile: customerMobile.trim(),
-
-  //       customerEmail: customerEmail.trim(),
-
-  //       customerAddress: address.trim(),
-
-  //       // Optional
-  //       specialRequests: requests.trim() || null,
-  //     };
-
-  //     console.log("BOOKING PAYLOAD:", payload);
-
-  //     const response = await axiosInstance.post(API.BOOKING.CREATE, payload);
-
-  //     console.log("Booking response:", response.data);
-
-  //     setSuccessMessage(
-  //       response.data.message || "Booking request submitted successfully!",
-  //     );
-
-  //     // Refresh calendar
-  //     await fetchAvailability();
-
-  //     // Reset date
-  //     setSelectedDate(null);
-
-  //     // Reset customer fields
-  //     setCustomerName("");
-  //     setCustomerMobile("");
-  //     setCustomerEmail("");
-  //     setAddress("");
-  //     setRequests("");
-  //   } catch (error: any) {
-  //     console.error("Booking error:", error);
-
-  //     setErrorMessage(
-  //       error?.response?.data?.message || "Failed to create booking.",
-  //     );
-  //   } finally {
-  //     setBookingLoading(false);
-  //   }
-  // };
 
   const handleBooking = () => {
-  setErrorMessage("");
-  setSuccessMessage("");
+    setErrorMessage("");
+    setSuccessMessage("");
 
-  if (!isAuthenticated) {
-    setErrorMessage("Please login before booking.");
-    return;
-  }
+    if (!isAuthenticated) {
+      setErrorMessage("Please login before booking.");
+      return;
+    }
 
-  if (!selectedDate) {
-    setErrorMessage("Please select a booking date.");
-    return;
-  }
+    if (!selectedDate) {
+      setErrorMessage("Please select a booking date.");
+      return;
+    }
 
-  if (!venueId || !packageId) {
-    setErrorMessage("Please select a lawn and package.");
-    return;
-  }
+    if (
+      selectedDate <
+      new Date(today.getFullYear(), today.getMonth(), today.getDate())
+    ) {
+      setErrorMessage("Please select today or a future date.");
+      return;
+    }
 
-  if (
-    !customerName.trim() ||
-    !customerMobile.trim() ||
-    !customerEmail.trim() ||
-    !address.trim()
-  ) {
-    setErrorMessage(
-      "Please complete all required customer information."
-    );
-    return;
-  }
+    if (!venueId || !packageId) {
+      setErrorMessage("Please select a lawn and package.");
+      return;
+    }
 
-  if (Number(guests) <= 0) {
-    setErrorMessage("Please enter a valid guest count.");
-    return;
-  }
+    if (availability[getDateKey(selectedDate)]?.available === false) {
+      setErrorMessage(
+        "This date is already booked. Please select another date.",
+      );
+      return;
+    }
 
-  setIsPaymentModalOpen(true);
-};
+    if (
+      !customerName.trim() ||
+      !customerMobile.trim() ||
+      !customerEmail.trim() ||
+      !address.trim()
+    ) {
+      setErrorMessage("Please complete all required customer information.");
+      return;
+    }
 
-///payment submit code===========================
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail.trim())) {
+      setErrorMessage("Please enter a valid email address.");
+      return;
+    }
 
+    if (Number(guests) <= 0 || !Number.isInteger(Number(guests))) {
+      setErrorMessage("Please enter a valid guest count.");
+      return;
+    }
 
-const submitBooking = async (
-  paymentMethod: "pay_at_lawn" | "online"
-) => {
-  if (!selectedDate || !venueId || !packageId) {
-    setErrorMessage("Select a date, lawn and package.");
-    return;
-  }
+    setIsPaymentModalOpen(true);
+  };
 
-  let bookingId: number | null = null;
+  // ===================================================
+  // BOOKING AND PAYMENT
+  // ===================================================
 
-  try {
+  const submitBooking = async (paymentMethod: "pay_at_lawn" | "online") => {
+    if (submittingRef.current) return;
+
+    if (!isAuthenticated) {
+      setErrorMessage("Please login before booking.");
+      return;
+    }
+
+    if (!selectedDate || !venueId || !packageId) {
+      setErrorMessage("Please select a date, lawn and package.");
+      return;
+    }
+
+    submittingRef.current = true;
     setBookingLoading(true);
     setErrorMessage("");
     setSuccessMessage("");
@@ -532,166 +445,221 @@ const submitBooking = async (
       specialRequests: requests.trim() || null,
     };
 
-    // CASH: create a booking without online payment.
+    // -----------------------------------------------
+    // PAY AT LAWN
+    // -----------------------------------------------
+
     if (paymentMethod === "pay_at_lawn") {
-      const response = await axiosInstance.post(
-        API.BOOKING.CREATE,
-        { ...payload, paymentMethod: "pay_at_lawn" }
-      );
+      try {
+        const response = await axiosInstance.post(API.BOOKING.CREATE, {
+          ...payload,
+          paymentMethod: "pay_at_lawn",
+        });
 
-      setIsPaymentModalOpen(false);
-      setSuccessMessage(
-        response.data.message ||
-        "Booking request submitted. Payment is due at the lawn."
-      );
+        setIsPaymentModalOpen(false);
 
-      await fetchAvailability();
-      setSelectedDate(null);
-      setCustomerName("");
-      setCustomerMobile("");
-      setCustomerEmail("");
-      setAddress("");
-      setRequests("");
+        setSuccessMessage(
+          response.data.message ||
+            "Booking request submitted. Payment is due at the lawn.",
+        );
+
+        clearCustomerForm();
+
+        // A failed refresh should not undo a successful booking.
+        try {
+          await fetchMyBookings();
+          await fetchAvailability();
+        } catch (refreshError) {
+          console.error("Booking refresh error:", refreshError);
+        }
+
+        navigate("/bookings-public");
+      } catch (error: any) {
+        console.error("Cash booking error:", error);
+
+        setErrorMessage(
+          error.response?.data?.message ||
+            "Unable to submit your booking request.",
+        );
+      } finally {
+        setBookingLoading(false);
+        submittingRef.current = false;
+      }
+
       return;
     }
 
-    // ONLINE: ask backend to calculate the price and create an order.
-    const response = await axiosInstance.post(
-      API.PAYMENT.CREATE_ORDER,
-      payload
-    );
+    // -----------------------------------------------
+    // ONLINE PAYMENT: CREATE ORDER
+    // -----------------------------------------------
 
-    const data = response.data;
-    bookingId = Number(data.bookingId);
+    let bookingId: number | null = null;
 
-    if (!bookingId || !data.razorpayOrderId || !data.keyId) {
-      throw new Error("The server did not return a valid payment order.");
-    }
-
-    if (!window.Razorpay) {
-      // Do not mark the booking as paid.
-      throw new Error(
-        "Razorpay Checkout did not load. Reload the page and check your booking before retrying."
+    try {
+      const orderResponse = await axiosInstance.post(
+        API.PAYMENT.CREATE_ORDER,
+        payload,
       );
-    }
 
-    const checkout = new window.Razorpay({
-      key: data.keyId,
-      amount: data.amount,
-      currency: data.currency || "INR",
-      name: "Durga Marriage Lawn",
-      description: "Marriage lawn booking payment",
-      order_id: data.razorpayOrderId,
-      prefill: {
-        name: customerName.trim(),
-        email: customerEmail.trim(),
-        contact: customerMobile.trim(),
-      },
-      theme: { color: "#d8a849" },
+      const order = orderResponse.data;
+      bookingId = Number(order.bookingId);
 
-      handler: async (
-        paymentResponse: RazorpayPaymentResponse
-      ) => {
-        setBookingLoading(true);
-
-        try {
-          const verification = await axiosInstance.post(
-            API.PAYMENT.VERIFY,
-            {
-              bookingId,
-              ...paymentResponse,
-            }
-          );
-
-          setIsPaymentModalOpen(false);
-          setSuccessMessage(
-            verification.data.message ||
-            "Payment verified. Your booking awaits admin confirmation."
-          );
-
-          await fetchAvailability();
-          setSelectedDate(null);
-          setCustomerName("");
-          setCustomerMobile("");
-          setCustomerEmail("");
-          setAddress("");
-          setRequests("");
-        } catch (error: any) {
-          console.error("Payment verification error:", error);
-          setErrorMessage(
-            error.response?.data?.message ||
-            "Payment verification is pending. Check My Bookings before paying again."
-          );
-        } finally {
-          setBookingLoading(false);
-        }
-      },
-    });
-
-    checkout.on("payment.failed", async () => {
-      try {
-        await axiosInstance.post(API.PAYMENT.FAILURE, { bookingId });
-      } catch (error) {
-        console.error("Failed to update payment status:", error);
+      if (
+        !Number.isInteger(bookingId) ||
+        bookingId <= 0 ||
+        !order.razorpayOrderId ||
+        !order.keyId ||
+        !Number(order.amount)
+      ) {
+        throw new Error(
+          "The server did not return valid payment order details.",
+        );
       }
 
+      if (!window.Razorpay) {
+        throw new Error(
+          "Razorpay Checkout did not load. Reload the page and check My Bookings before retrying.",
+        );
+      }
+
+      const checkout = new window.Razorpay({
+        key: order.keyId,
+        amount: Number(order.amount),
+        currency: order.currency || "INR",
+        name: "Durga Marriage Lawn",
+        description: "Marriage lawn booking payment",
+        order_id: order.razorpayOrderId,
+
+        prefill: {
+          name: customerName.trim(),
+          email: customerEmail.trim(),
+          contact: customerMobile.trim(),
+        },
+
+        theme: {
+          color: "#d8a849",
+        },
+
+        // Only the backend verification response confirms payment.
+        handler: async (paymentResponse) => {
+          setBookingLoading(true);
+          setErrorMessage("");
+
+          try {
+            const verificationResponse = await axiosInstance.post(
+              API.PAYMENT.VERIFY,
+              {
+                bookingId,
+                ...paymentResponse,
+              },
+            );
+
+            setIsPaymentModalOpen(false);
+
+            setSuccessMessage(
+              verificationResponse.data.message ||
+                "Payment verified. Your booking awaits admin confirmation.",
+            );
+
+            clearCustomerForm();
+
+            // Refresh booking data and availability after verification.
+            try {
+              await fetchMyBookings();
+              await fetchAvailability();
+            } catch (refreshError) {
+              console.error("Post-payment refresh error:", refreshError);
+            }
+
+            navigate("/bookings-public");
+          } catch (error: any) {
+            console.error("Payment verification error:", error);
+
+            setErrorMessage(
+              error.response?.data?.message ||
+                "Payment verification could not be confirmed. Check My Bookings before attempting another payment.",
+            );
+          } finally {
+            setBookingLoading(false);
+            submittingRef.current = false;
+          }
+        },
+
+        modal: {
+          ondismiss: () => {
+            setErrorMessage(
+              "Checkout was closed. Check My Bookings before trying again.",
+            );
+
+            setBookingLoading(false);
+            submittingRef.current = false;
+          },
+        },
+      });
+
+      checkout.on("payment.failed", async (failure) => {
+        console.error("Razorpay payment failed:", failure);
+
+        try {
+          await axiosInstance.post(API.PAYMENT.FAILURE, {
+            bookingId,
+          });
+        } catch (failureError) {
+          console.error(
+            "Could not update payment failure status:",
+            failureError,
+          );
+        }
+
+        setErrorMessage(
+          "Payment failed. Check My Bookings before attempting another payment.",
+        );
+
+        setBookingLoading(false);
+        submittingRef.current = false;
+      });
+
+      setIsPaymentModalOpen(false);
+
+      // Checkout now owns the payment interaction.
+      setBookingLoading(false);
+      checkout.open();
+    } catch (error: any) {
+      console.error("Online booking/payment error:", error);
+
       setErrorMessage(
-        "Payment failed. Check your booking status before attempting another payment."
+        error.response?.data?.message ||
+          error.message ||
+          "Unable to process your booking.",
       );
-    });
 
-    setIsPaymentModalOpen(false);
-    checkout.open();
-  } catch (error: any) {
-    console.error("Booking/payment error:", error);
-    setErrorMessage(
-      error.response?.data?.message ||
-      error.message ||
-      "Unable to process your booking."
-    );
-  } finally {
-    setBookingLoading(false);
-  }
-};
+      setBookingLoading(false);
+      submittingRef.current = false;
+    }
+  };
 
-
-  // =====================================================
+  // ===================================================
   // RENDER
-  // =====================================================
+  // ===================================================
 
   return (
     <div className="min-h-screen bg-[#17120f] text-white">
       <Navbar />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        {/* ==========================================
-            PAGE HEADING
-        ========================================== */}
-
+      <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-semibold">
+          <h1 className="text-3xl font-semibold sm:text-4xl">
             Book Your Special Day
           </h1>
 
-          <p className="text-[#9e9188] mt-2 text-sm">
+          <p className="mt-2 text-sm text-[#9e9188]">
             Select your preferred date, lawn and package.
           </p>
         </div>
 
-        {/* ==========================================
-            MAIN GRID
-        ========================================== */}
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* ========================================
-              LEFT SIDE
-          ======================================== */}
-
-          <div className="lg:col-span-2 space-y-6">
-            {/* ======================================
-                CALENDAR
-            ====================================== */}
-
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          {/* LEFT SIDE */}
+          <div className="space-y-6 lg:col-span-2">
             <BookingCalendar
               currentMonth={currentMonth}
               selectedDate={selectedDate}
@@ -699,55 +667,42 @@ const submitBooking = async (
               loadingAvailability={loadingAvailability}
               onMonthChange={(date: Date) => {
                 setCurrentMonth(date);
-
                 setSelectedDate(null);
-
                 setSuccessMessage("");
-
                 setErrorMessage("");
               }}
               onDateSelect={(date: Date) => {
                 setSelectedDate(date);
-
                 setSuccessMessage("");
-
                 setErrorMessage("");
               }}
             />
 
-            {/* ======================================
-                EVENT INFORMATION
-            ====================================== */}
+            {/* EVENT INFORMATION */}
+            <section className="rounded-xl border border-[#3a2f29] bg-[#2b211c] p-5">
+              <h2 className="mb-5 text-lg font-medium">Event Information</h2>
 
-            <div className="bg-[#2b211c] border border-[#3a2f29] rounded-xl p-5">
-              <h2 className="text-lg font-medium mb-5">Event Information</h2>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                {/* VENUE */}
-
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                 <div>
-                  <label className="block text-xs text-[#a39790] mb-2">
+                  <label className="mb-2 block text-xs text-[#a39790]">
                     Marriage Lawn
                   </label>
 
                   <select
                     value={venueId ?? ""}
-                    onChange={(e) => {
-                      const value = Number(e.target.value);
-
-                      setVenueId(value);
-
+                    onChange={(event) => {
+                      setVenueId(
+                        event.target.value ? Number(event.target.value) : null,
+                      );
                       setSelectedDate(null);
-
-                      setSuccessMessage("");
-
                       setErrorMessage("");
+                      setSuccessMessage("");
                     }}
                     disabled={loadingVenues}
-                    className="w-full bg-[#201813] border border-[#4b4039] rounded-lg px-3 py-3 text-sm outline-none focus:border-[#d8a849]"
+                    className="w-full rounded-lg border border-[#4b4039] bg-[#201813] px-3 py-3 text-sm outline-none focus:border-[#d8a849]"
                   >
                     {loadingVenues ? (
-                      <option>Loading lawns...</option>
+                      <option value="">Loading lawns...</option>
                     ) : venues.length === 0 ? (
                       <option value="">No lawns available</option>
                     ) : (
@@ -760,21 +715,23 @@ const submitBooking = async (
                   </select>
                 </div>
 
-                {/* PACKAGE */}
-
                 <div>
-                  <label className="block text-xs text-[#a39790] mb-2">
+                  <label className="mb-2 block text-xs text-[#a39790]">
                     Package
                   </label>
 
                   <select
                     value={packageId ?? ""}
-                    onChange={(e) => setPackageId(Number(e.target.value))}
+                    onChange={(event) =>
+                      setPackageId(
+                        event.target.value ? Number(event.target.value) : null,
+                      )
+                    }
                     disabled={loadingPackages}
-                    className="w-full bg-[#201813] border border-[#4b4039] rounded-lg px-3 py-3 text-sm outline-none focus:border-[#d8a849]"
+                    className="w-full rounded-lg border border-[#4b4039] bg-[#201813] px-3 py-3 text-sm outline-none focus:border-[#d8a849]"
                   >
                     {loadingPackages ? (
-                      <option>Loading packages...</option>
+                      <option value="">Loading packages...</option>
                     ) : packages.length === 0 ? (
                       <option value="">No packages available</option>
                     ) : (
@@ -787,222 +744,172 @@ const submitBooking = async (
                   </select>
                 </div>
 
-                {/* OCCASION */}
-
                 <div>
-                  <label className="block text-xs text-[#a39790] mb-2">
+                  <label className="mb-2 block text-xs text-[#a39790]">
                     Occasion
                   </label>
 
                   <select
                     value={occasion}
-                    onChange={(e) => setOccasion(e.target.value)}
-                    className="w-full bg-[#201813] border border-[#4b4039] rounded-lg px-3 py-3 text-sm outline-none focus:border-[#d8a849]"
+                    onChange={(event) => setOccasion(event.target.value)}
+                    className="w-full rounded-lg border border-[#4b4039] bg-[#201813] px-3 py-3 text-sm outline-none focus:border-[#d8a849]"
                   >
-                    <option value="Wedding">Wedding</option>
-
-                    <option value="Engagement">Engagement</option>
-
-                    <option value="Reception">Reception</option>
-
-                    <option value="Birthday">Birthday</option>
-
-                    <option value="Anniversary">Anniversary</option>
-
-                    <option value="Haldi Ceremony">Haldi Ceremony</option>
-
-                    <option value="Mehndi Ceremony">Mehndi Ceremony</option>
-
-                    <option value="Sangeet Ceremony">Sangeet Ceremony</option>
-
-                    <option value="Roka Ceremony">Roka Ceremony</option>
-
-                    <option value="Tilak Ceremony">Tilak Ceremony</option>
-
-                    <option value="Ring Ceremony">Ring Ceremony</option>
-
-                    <option value="Cocktail Party">Cocktail Party</option>
-
-                    <option value="Baby Shower">Baby Shower</option>
-
-                    <option value="Naming Ceremony">Naming Ceremony</option>
-
-                    <option value="Retirement Party">Retirement Party</option>
-
-                    <option value="Farewell Party">Farewell Party</option>
-
-                    <option value="Kitty Party">Kitty Party</option>
-
-                    <option value="Corporate Event">Corporate Event</option>
-
-                    <option value="Business Meeting">Business Meeting</option>
-
-                    <option value="Conference">Conference</option>
-
-                    <option value="Product Launch">Product Launch</option>
-
-                    <option value="Award Ceremony">Award Ceremony</option>
-
-                    <option value="Cultural Event">Cultural Event</option>
-
-                    <option value="Religious Ceremony">
-                      Religious Ceremony
-                    </option>
-
-                    <option value="Family Function">Family Function</option>
-
-                    <option value="Social Gathering">Social Gathering</option>
-
-                    <option value="Festival Celebration">
-                      Festival Celebration
-                    </option>
-
-                    <option value="Golden Jubilee">Golden Jubilee</option>
-
-                    <option value="Silver Jubilee">Silver Jubilee</option>
-
-                    <option value="Graduation Party">Graduation Party</option>
-
-                    <option value="Reunion">Reunion</option>
-
-                    <option value="Other">Other</option>
+                    {[
+                      "Wedding",
+                      "Engagement",
+                      "Reception",
+                      "Birthday",
+                      "Anniversary",
+                      "Haldi Ceremony",
+                      "Mehndi Ceremony",
+                      "Sangeet Ceremony",
+                      "Roka Ceremony",
+                      "Tilak Ceremony",
+                      "Ring Ceremony",
+                      "Cocktail Party",
+                      "Baby Shower",
+                      "Naming Ceremony",
+                      "Retirement Party",
+                      "Farewell Party",
+                      "Kitty Party",
+                      "Corporate Event",
+                      "Business Meeting",
+                      "Conference",
+                      "Product Launch",
+                      "Award Ceremony",
+                      "Cultural Event",
+                      "Religious Ceremony",
+                      "Family Function",
+                      "Social Gathering",
+                      "Festival Celebration",
+                      "Golden Jubilee",
+                      "Silver Jubilee",
+                      "Graduation Party",
+                      "Reunion",
+                      "Other",
+                    ].map((item) => (
+                      <option key={item} value={item}>
+                        {item}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
-                {/* GUESTS */}
-
                 <div>
-                  <label className="block text-xs text-[#a39790] mb-2">
+                  <label className="mb-2 block text-xs text-[#a39790]">
                     Number of Guests
                   </label>
 
                   <input
                     type="number"
-                    min="1"
+                    min={1}
                     value={guests}
-                    onChange={(e) =>
-                      setGuests(Math.max(1, Number(e.target.value)))
+                    onChange={(event) =>
+                      setGuests(Math.max(1, Number(event.target.value) || 1))
                     }
-                    className="w-full bg-[#201813] border border-[#4b4039] rounded-lg px-3 py-3 text-sm outline-none focus:border-[#d8a849]"
+                    className="w-full rounded-lg border border-[#4b4039] bg-[#201813] px-3 py-3 text-sm outline-none focus:border-[#d8a849]"
                   />
                 </div>
               </div>
 
-              {/* ====================================
-                  CUSTOMER INFORMATION
-              ==================================== */}
-
-              <div className="mt-6 pt-6 border-t border-[#3a2f29]">
-                <h3 className="text-sm font-medium mb-4">
+              {/* CUSTOMER INFORMATION */}
+              <div className="mt-6 border-t border-[#3a2f29] pt-6">
+                <h3 className="mb-4 text-sm font-medium">
                   Customer Information
                 </h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* NAME */}
-
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   <div>
-                    <label className="block text-xs text-[#a39790] mb-2">
-                      Name
+                    <label className="mb-2 block text-xs text-[#a39790]">
+                      Full Name *
                     </label>
 
                     <input
                       type="text"
+                      autoComplete="name"
                       value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
+                      onChange={(event) => setCustomerName(event.target.value)}
                       placeholder="Your name"
-                      className="w-full bg-[#201813] border border-[#3d332c] rounded-lg px-3 py-3 text-sm outline-none focus:border-[#d8a849] placeholder:text-[#625850]"
+                      className="w-full rounded-lg border border-[#3d332c] bg-[#201813] px-3 py-3 text-sm outline-none placeholder:text-[#625850] focus:border-[#d8a849]"
                     />
                   </div>
 
-                  {/* MOBILE */}
-
                   <div>
-                    <label className="block text-xs text-[#a39790] mb-2">
-                      Mobile <span className="text-red-600">*</span>
+                    <label className="mb-2 block text-xs text-[#a39790]">
+                      Mobile Number *
                     </label>
 
                     <input
                       type="tel"
-                      required
+                      autoComplete="tel"
                       value={customerMobile}
-                      onChange={(e) => setCustomerMobile(e.target.value)}
+                      onChange={(event) =>
+                        setCustomerMobile(event.target.value)
+                      }
                       placeholder="Mobile number"
-                      className="w-full bg-[#201813] border border-[#3d332c] rounded-lg px-3 py-3 text-sm outline-none focus:border-[#d8a849] placeholder:text-[#625850]"
+                      className="w-full rounded-lg border border-[#3d332c] bg-[#201813] px-3 py-3 text-sm outline-none placeholder:text-[#625850] focus:border-[#d8a849]"
                     />
                   </div>
 
-                  {/* EMAIL */}
-
                   <div>
-                    <label className="block text-xs text-[#a39790] mb-2">
-                      Email
+                    <label className="mb-2 block text-xs text-[#a39790]">
+                      Email Address *
                     </label>
 
                     <input
                       type="email"
+                      autoComplete="email"
                       value={customerEmail}
-                      onChange={(e) => setCustomerEmail(e.target.value)}
+                      onChange={(event) => setCustomerEmail(event.target.value)}
                       placeholder="Email address"
-                      className="w-full bg-[#201813] border border-[#3d332c] rounded-lg px-3 py-3 text-sm outline-none focus:border-[#d8a849] placeholder:text-[#625850]"
+                      className="w-full rounded-lg border border-[#3d332c] bg-[#201813] px-3 py-3 text-sm outline-none placeholder:text-[#625850] focus:border-[#d8a849]"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* ====================================
-                  ADDRESS
-              ==================================== */}
-
+              {/* ADDRESS */}
               <div className="mt-6">
-                <label className="block text-xs text-[#a39790] mb-2">
-                  Enter Your Complete Address{" "}
-                  <span className="text-red-600">*</span>
+                <label className="mb-2 block text-xs text-[#a39790]">
+                  Complete Address *
                 </label>
 
                 <textarea
                   rows={3}
+                  autoComplete="street-address"
                   value={address}
-                  onChange={(e) => setAddress(e.target.value)}
+                  onChange={(event) => setAddress(event.target.value)}
                   placeholder="Enter your complete address..."
-                  className="w-full bg-[#201813] border border-[#4b4039] rounded-lg px-3 py-3 text-sm outline-none focus:border-[#d8a849] resize-none placeholder:text-[#625850]"
+                  className="w-full resize-none rounded-lg border border-[#4b4039] bg-[#201813] px-3 py-3 text-sm outline-none placeholder:text-[#625850] focus:border-[#d8a849]"
                 />
               </div>
 
-              {/* ====================================
-                  SPECIAL REQUESTS
-              ==================================== */}
-
+              {/* SPECIAL REQUESTS */}
               <div className="mt-6">
-                <label className="block text-xs text-[#a39790] mb-2">
+                <label className="mb-2 block text-xs text-[#a39790]">
                   Special Requests
                 </label>
 
                 <textarea
-                  rows={4}
+                  rows={3}
                   value={requests}
-                  onChange={(e) => setRequests(e.target.value)}
+                  onChange={(event) => setRequests(event.target.value)}
                   placeholder="Decoration, catering, parking, special arrangements..."
-                  className="w-full bg-[#201813] border border-[#4b4039] rounded-lg px-3 py-3 text-sm outline-none focus:border-[#d8a849] resize-none placeholder:text-[#625850]"
+                  className="w-full resize-none rounded-lg border border-[#4b4039] bg-[#201813] px-3 py-3 text-sm outline-none placeholder:text-[#625850] focus:border-[#d8a849]"
                 />
               </div>
-            </div>
+            </section>
           </div>
 
-          {/* ========================================
-              RIGHT SIDE - SUMMARY
-          ======================================== */}
-
-          <div>
-            <div className="lg:sticky lg:top-24 bg-[#2b211c] border border-[#3a2f29] rounded-xl p-5">
-              <h2 className="text-lg font-medium mb-5">Booking Summary</h2>
+          {/* RIGHT SIDE: SUMMARY */}
+          <aside>
+            <div className="rounded-xl border border-[#3a2f29] bg-[#2b211c] p-5 lg:sticky lg:top-24">
+              <h2 className="mb-5 text-lg font-medium">Booking Summary</h2>
 
               <div className="space-y-4">
-                {/* DATE */}
-
                 <div>
                   <p className="text-xs text-[#81756d]">Selected Date</p>
-
-                  <p className="text-sm mt-1">
+                  <p className="mt-1 text-sm">
                     {selectedDate
                       ? selectedDate.toLocaleDateString("en-IN", {
                           day: "2-digit",
@@ -1013,261 +920,235 @@ const submitBooking = async (
                   </p>
                 </div>
 
-                {/* VENUE */}
-
                 <div>
                   <p className="text-xs text-[#81756d]">Lawn</p>
-
-                  <p className="text-sm mt-1">
-                    {venues.find((v) => v.id === venueId)?.name ||
+                  <p className="mt-1 text-sm">
+                    {venues.find((venue) => venue.id === venueId)?.name ||
                       "Select lawn"}
                   </p>
                 </div>
 
-                {/* PACKAGE */}
-
                 <div>
                   <p className="text-xs text-[#81756d]">Package</p>
-
-                  <p className="text-sm mt-1">
+                  <p className="mt-1 text-sm">
                     {selectedPackage?.name || "Select package"}
                   </p>
                 </div>
 
-                {/* OCCASION */}
-
                 <div>
                   <p className="text-xs text-[#81756d]">Occasion</p>
-
-                  <p className="text-sm mt-1">{occasion}</p>
+                  <p className="mt-1 text-sm">{occasion}</p>
                 </div>
-
-                {/* GUESTS */}
 
                 <div>
                   <p className="text-xs text-[#81756d]">Guests</p>
-
-                  <p className="text-sm mt-1">{guests}</p>
+                  <p className="mt-1 text-sm">{guests}</p>
                 </div>
 
-                {/* AVAILABILITY */}
-
-                <div className="bg-[#22271f] rounded-lg p-3">
-                  {selectedDate ? (
-                    availability[getDateKey(selectedDate)]?.available ===
-                    false ? (
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-red-500" />
-
-                        <span className="text-xs text-red-400">
-                          Selected date is unavailable
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-[#62a86c]" />
-
-                        <span className="text-xs text-[#76ab7b]">
-                          This date is available
-                        </span>
-                      </div>
-                    )
-                  ) : (
+                <div className="rounded-lg bg-[#22271f] p-3">
+                  {!selectedDate ? (
                     <span className="text-xs text-[#8b7e76]">
                       Select a date to check availability
                     </span>
+                  ) : loadingAvailability ? (
+                    <span className="text-xs text-[#a39790]">
+                      Checking availability...
+                    </span>
+                  ) : availability[getDateKey(selectedDate)]?.available ===
+                    false ? (
+                    <div className="flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-red-500" />
+                      <span className="text-xs text-red-400">
+                        Selected date is unavailable
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-[#62a86c]" />
+                      <span className="text-xs text-[#76ab7b]">
+                        This date appears available
+                      </span>
+                    </div>
                   )}
                 </div>
 
-                {/* PRICE */}
-
-                <div className="border-t border-[#3a2f29] pt-4 space-y-3">
-                  {/* BASE */}
-
+                {/* PRICE BREAKDOWN */}
+                <div className="space-y-3 border-t border-[#3a2f29] pt-4">
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-[#968980]">Base package</span>
-
                     <span className="text-sm">{formatCurrency(basePrice)}</span>
                   </div>
 
-                  {/* EXTRA GUESTS */}
-
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-[#968980]">Extra guests</span>
-
+                    <span className="text-xs text-[#968980]">
+                      Extra guests ({extraGuests})
+                    </span>
                     <span className="text-sm">
                       {formatCurrency(extraGuestAmount)}
                     </span>
                   </div>
 
-                  {/* SUBTOTAL */}
-
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-[#968980]">Subtotal</span>
-
                     <span className="text-sm">{formatCurrency(subtotal)}</span>
                   </div>
 
-                  {/* GST */}
-
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-[#968980]">GST (18%)</span>
-
                     <span className="text-sm">{formatCurrency(gst)}</span>
                   </div>
 
-                  {/* TOTAL */}
-
                   <div className="flex items-center justify-between pt-2">
                     <span className="text-sm font-medium">Total</span>
-
                     <span className="text-xl font-semibold text-[#d8a849]">
                       {formatCurrency(total)}
                     </span>
                   </div>
+
+                  <p className="text-[10px] text-[#81756d]">
+                    Final booking charges are calculated by the server.
+                  </p>
                 </div>
               </div>
 
-              {/* ======================================
-                  SUCCESS
-              ====================================== */}
-
               {successMessage && (
-                <div className="mt-5 bg-[#1f3224] border border-[#315d39] text-[#7bc182] rounded-lg p-3 text-xs">
+                <div
+                  role="status"
+                  className="mt-5 rounded-lg border border-[#315d39] bg-[#1f3224] p-3 text-xs text-[#7bc182]"
+                >
                   {successMessage}
                 </div>
               )}
 
-              {/* ======================================
-                  ERROR
-              ====================================== */}
-
               {errorMessage && (
-                <div className="mt-5 bg-[#351f1f] border border-[#623333] text-red-400 rounded-lg p-3 text-xs">
+                <div
+                  role="alert"
+                  className="mt-5 rounded-lg border border-[#623333] bg-[#351f1f] p-3 text-xs text-red-400"
+                >
                   {errorMessage}
                 </div>
               )}
-
-              {/* ======================================
-                  BOOKING BUTTON
-              ====================================== */}
 
               <button
                 type="button"
                 onClick={handleBooking}
                 disabled={
                   bookingLoading ||
+                  loadingVenues ||
+                  loadingPackages ||
+                  loadingAvailability ||
                   !selectedDate ||
                   !venueId ||
                   !packageId ||
-                  !isAuthenticated
+                  !isAuthenticated ||
+                  availability[getDateKey(selectedDate || today)]?.available ===
+                    false
                 }
-                className="w-full mt-5 py-3 bg-[#d8a849] hover:bg-[#c99a3d] disabled:bg-[#594c37] disabled:text-[#887b69] disabled:cursor-not-allowed text-black text-sm font-medium rounded-lg transition flex items-center justify-center gap-2"
+                className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-[#d8a849] py-3 text-sm font-medium text-black transition hover:bg-[#c99a3d] disabled:cursor-not-allowed disabled:bg-[#594c37] disabled:text-[#887b69]"
               >
                 {bookingLoading ? (
                   <>
                     <Loader2 size={16} className="animate-spin" />
-                    Sending...
+                    Processing...
                   </>
+                ) : !isAuthenticated ? (
+                  "Login to Book"
                 ) : (
                   "Request Booking"
                 )}
               </button>
-              
-              <p className="text-[10px] text-[#71655d] text-center mt-3">
+
+              <p className="mt-3 text-center text-[10px] text-[#71655d]">
                 Final booking confirmation will be done by the admin.
               </p>
-
-              {/* payment related code  */}
-
-              {isPaymentModalOpen && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-    <div className="w-full max-w-lg rounded-2xl border border-[#4b4039] bg-[#2b211c] p-6 shadow-2xl">
-
-      <h2 className="text-xl font-semibold">
-        Choose Payment Method
-      </h2>
-
-      <p className="mt-2 text-sm text-[#a39790]">
-        Select how you would like to pay for your booking.
-      </p>
-
-      <div className="mt-5 rounded-lg bg-[#201813] p-4">
-        <p className="text-xs text-[#9e9188]">
-          Total booking amount
-        </p>
-
-        <p className="mt-1 text-2xl font-semibold text-[#d8a849]">
-          {formatCurrency(total)}
-        </p>
-      </div>
-
-      <button
-        type="button"
-        disabled={bookingLoading}
-        onClick={() => submitBooking("pay_at_lawn")}
-        className="mt-5 flex w-full items-center gap-4 rounded-xl border border-[#514239] bg-[#201813] p-4 text-left transition hover:border-[#d8a849] disabled:opacity-50"
-      >
-        <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#34281f] text-[#d8a849]">
-          <Banknote/>
-        </span>
-
-        <span className="flex-1">
-          <span className="block text-sm font-medium">
-            Pay at Lawn
-          </span>
-
-          <span className="mt-1 block text-xs text-[#9e9188]">
-            Pay in person. Your booking request will be saved.
-          </span>
-        </span>
-      </button>
-
-      <button
-        type="button"
-        disabled={bookingLoading}
-        onClick={() => submitBooking("online")}
-        className="mt-3 flex w-full items-center gap-4 rounded-xl border border-[#514239] bg-[#201813] p-4 text-left transition hover:border-[#d8a849] disabled:opacity-50"
-      >
-        <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#34281f] text-[#d8a849]">
-          <CreditCard />
-        </span>
-
-        <span className="flex-1">
-          <span className="block text-sm font-medium">
-            Pay Online
-          </span>
-
-          <span className="mt-1 block text-xs text-[#9e9188]">
-            Continue to secure Razorpay Checkout.
-          </span>
-        </span>
-      </button>
-
-      <button
-        type="button"
-        disabled={bookingLoading}
-        onClick={() => setIsPaymentModalOpen(false)}
-        className="mt-4 w-full rounded-lg border border-[#514239] px-4 py-3 text-sm text-[#b8aaa1] transition hover:bg-[#382b23] disabled:opacity-50"
-      >
-        Cancel
-      </button>
-
-      {bookingLoading && (
-        <p className="mt-3 text-center text-xs text-[#a39790]">
-          Processing booking...
-        </p>
-      )}
-{/* end payment code  */}
-    </div>
-  </div>
-)}
             </div>
-          </div>
+          </aside>
         </div>
       </main>
 
       <Footer />
+
+      {/* =================================================
+          PAYMENT METHOD MODAL
+      ================================================= */}
+
+      {isPaymentModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="payment-modal-title"
+        >
+          <div className="w-full max-w-lg rounded-2xl border border-[#4b4039] bg-[#2b211c] p-6 shadow-2xl">
+            <h2 id="payment-modal-title" className="text-xl font-semibold">
+              Choose Payment Method
+            </h2>
+
+            <p className="mt-2 text-sm text-[#a39790]">
+              Select how you would like to pay for your booking.
+            </p>
+
+            <div className="mt-5 rounded-lg bg-[#201813] p-4">
+              <p className="text-xs text-[#9e9188]">Estimated booking amount</p>
+              <p className="mt-1 text-2xl font-semibold text-[#d8a849]">
+                {formatCurrency(total)}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              disabled={bookingLoading}
+              onClick={() => void submitBooking("pay_at_lawn")}
+              className="mt-5 flex w-full items-center gap-4 rounded-xl border border-[#514239] bg-[#201813] p-4 text-left transition hover:border-[#d8a849] disabled:opacity-50"
+            >
+              <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#34281f] text-[#d8a849]">
+                <Banknote size={22} />
+              </span>
+
+              <span className="flex-1">
+                <span className="block text-sm font-medium">Pay at Lawn</span>
+                <span className="mt-1 block text-xs text-[#9e9188]">
+                  Pay in person. Your booking request will be saved.
+                </span>
+              </span>
+            </button>
+
+            <button
+              type="button"
+              disabled={bookingLoading}
+              onClick={() => void submitBooking("online")}
+              className="mt-3 flex w-full items-center gap-4 rounded-xl border border-[#514239] bg-[#201813] p-4 text-left transition hover:border-[#d8a849] disabled:opacity-50"
+            >
+              <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#34281f] text-[#d8a849]">
+                <CreditCard size={22} />
+              </span>
+
+              <span className="flex-1">
+                <span className="block text-sm font-medium">Pay Online</span>
+                <span className="mt-1 block text-xs text-[#9e9188]">
+                  Continue to secure Razorpay Checkout.
+                </span>
+              </span>
+            </button>
+
+            <button
+              type="button"
+              disabled={bookingLoading}
+              onClick={() => setIsPaymentModalOpen(false)}
+              className="mt-4 w-full rounded-lg border border-[#514239] px-4 py-3 text-sm text-[#b8aaa1] transition hover:bg-[#382b23] disabled:opacity-50"
+            >
+              Cancel
+            </button>
+
+            {bookingLoading && (
+              <p className="mt-3 flex items-center justify-center gap-2 text-xs text-[#a39790]">
+                <Loader2 size={14} className="animate-spin" />
+                Processing booking...
+              </p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

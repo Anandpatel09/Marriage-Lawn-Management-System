@@ -116,20 +116,51 @@ const Bookings = () => {
   // FORMAT DATE
   // =====================================================
 
-  const formatDate = (dateString: string) => {
-    if (!dateString) {
-      return "";
-    }
+  // const formatDate = (dateString: string) => {
+  //   if (!dateString) {
+  //     return "";
+  //   }
 
-    const date = new Date(`${dateString}T00:00:00`);
+  //   const date = new Date(`${dateString}T00:00:00`);
 
-    return date.toLocaleDateString("en-IN", {
+  //   return date.toLocaleDateString("en-IN", {
+  //     day: "2-digit",
+  //     month: "short",
+  //     year: "numeric",
+  //   });
+  // };
+const formatDate = (dateString: string) => {
+  if (!dateString) return "Date unavailable";
+
+  // Handle YYYY-MM-DD without accidentally parsing it twice.
+  const match = String(dateString).match(/^(\d{4})-(\d{2})-(\d{2})/);
+
+  if (match) {
+    const [, year, month, day] = match;
+
+    return new Date(
+      Number(year),
+      Number(month) - 1,
+      Number(day)
+    ).toLocaleDateString("en-IN", {
       day: "2-digit",
       month: "short",
       year: "numeric",
     });
-  };
+  }
 
+  const date = new Date(dateString);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Date unavailable";
+  }
+
+  return date.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
   // =====================================================
   // FORMAT SLOT
   // =====================================================
