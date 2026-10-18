@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import Navbar from "../../../components/comman/Navbar";
 import Footer from "../../../components/comman/Footer";
+import OurLawnVedio from "./OurLawnVedio";
 
 interface Lawn {
   id: number;
@@ -334,7 +335,7 @@ const OurLawns = () => {
           </div>
         </section>
       </main>
-
+      <OurLawnVedio/>
       <Footer />
     </div>
   );
